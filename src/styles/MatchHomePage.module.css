@@ -1,0 +1,733 @@
+@import url('https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap');
+
+.page {
+  font-family: 'Inter', sans-serif;
+  background: #0a0e1a;
+  color: #fff;
+  min-height: 100vh;
+}
+
+.nav {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 48px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  background: rgba(10, 14, 26, 0.95);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  text-decoration: none;
+  color: #fff;
+}
+
+.logoIcon {
+  width: 36px;
+  height: 36px;
+  background: linear-gradient(135deg, #4f6ef7, #7c3aed);
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Syne', sans-serif;
+  font-weight: 800;
+  font-size: 16px;
+}
+
+.logoText {
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 18px;
+}
+
+.navRight {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+}
+
+.summonerBadge {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 6px 14px;
+  background: rgba(255, 255, 255, 0.06);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 8px;
+  font-size: 13px;
+}
+
+.rankPill {
+  padding: 2px 8px;
+  background: rgba(79, 110, 247, 0.2);
+  border-radius: 4px;
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.main {
+  max-width: 1400px;
+  margin: 0 auto;
+  padding: 40px 48px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 280px 1fr;
+  gap: 24px;
+  align-items: start;
+}
+
+.sidebar {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.sidebarCard {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  padding: 20px;
+}
+
+.profileTop {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  text-align: center;
+  padding-bottom: 16px;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+  margin-bottom: 16px;
+}
+
+.avatar {
+  width: 72px;
+  height: 72px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #4f6ef7, #7c3aed);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 30px;
+  margin-bottom: 12px;
+  border: 3px solid rgba(79, 110, 247, 0.4);
+}
+
+.profileName {
+  font-family: 'Syne', sans-serif;
+  font-size: 16px;
+  font-weight: 700;
+  margin-bottom: 4px;
+}
+
+.profileTag {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-bottom: 8px;
+}
+
+.profileMeta {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+
+.metaPill {
+  padding: 3px 10px;
+  border-radius: 20px;
+  font-size: 11px;
+  font-weight: 600;
+  background: rgba(255, 255, 255, 0.07);
+  color: rgba(255, 255, 255, 0.55);
+}
+
+.metaPillLevel {
+  background: rgba(79, 110, 247, 0.15);
+  color: #a5b4fc;
+}
+
+.metaPillServer {
+  background: rgba(124, 58, 237, 0.15);
+  color: #c4b5fd;
+}
+
+.profileStats {
+  display: flex;
+  justify-content: space-between;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.4);
+}
+
+.profileStats strong {
+  color: #a5b4fc;
+}
+
+.sectionLabel {
+  font-size: 10px;
+  font-weight: 700;
+  color: rgba(255, 255, 255, 0.25);
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  margin-bottom: 12px;
+}
+
+.rankBlock {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+  padding: 12px;
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.06);
+  border-radius: 10px;
+  margin-bottom: 10px;
+}
+
+.rankBlock:last-child {
+  margin-bottom: 0;
+}
+
+.rankIcon {
+  width: 52px;
+  height: 52px;
+  border-radius: 10px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  background: linear-gradient(135deg, rgba(96, 165, 250, 0.15), rgba(124, 58, 237, 0.15));
+  border: 1px solid rgba(96, 165, 250, 0.2);
+}
+
+.rankIconAlt {
+  background: linear-gradient(135deg, rgba(167, 139, 250, 0.15), rgba(124, 58, 237, 0.15));
+  border-color: rgba(167, 139, 250, 0.2);
+}
+
+.rankInfo {
+  flex: 1;
+}
+
+.rankType {
+  font-size: 10px;
+  color: rgba(255, 255, 255, 0.3);
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 3px;
+}
+
+.rankName {
+  font-family: 'Syne', sans-serif;
+  font-size: 15px;
+  font-weight: 700;
+  color: #93c5fd;
+  margin-bottom: 4px;
+}
+
+.rankLp {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+  margin-bottom: 6px;
+}
+
+.rankWl {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  font-size: 11px;
+}
+
+.wlWins {
+  color: #4ade80;
+  font-weight: 600;
+}
+
+.wlSep {
+  color: rgba(255, 255, 255, 0.2);
+}
+
+.wlLosses {
+  color: #f87171;
+  font-weight: 600;
+}
+
+.wlWr {
+  margin-left: auto;
+  padding: 2px 7px;
+  border-radius: 4px;
+  background: rgba(79, 110, 247, 0.15);
+  color: #a5b4fc;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.champRow,
+.masteryRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 8px 0;
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.champRow:last-child,
+.masteryRow:last-child {
+  border-bottom: none;
+}
+
+.champMiniIcon,
+.masteryIcon {
+  width: 34px;
+  height: 34px;
+  border-radius: 8px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+}
+
+.bgYasuo {
+  background: rgba(255, 200, 50, 0.12);
+}
+
+.bgAhri {
+  background: rgba(200, 100, 255, 0.12);
+}
+
+.bgZed {
+  background: rgba(100, 100, 100, 0.18);
+}
+
+.bgLeeSin {
+  background: rgba(255, 150, 50, 0.12);
+}
+
+.bgJinx {
+  background: rgba(255, 50, 100, 0.15);
+}
+
+.bgLissandra {
+  background: rgba(50, 200, 255, 0.15);
+}
+
+.bgMaokai {
+  background: rgba(100, 255, 150, 0.12);
+}
+
+.champMiniName,
+.masteryName {
+  font-size: 13px;
+  font-weight: 600;
+  margin-bottom: 2px;
+}
+
+.champMiniSub,
+.masteryPts,
+.champMiniGames {
+  font-size: 11px;
+  color: rgba(255, 255, 255, 0.3);
+}
+
+.champMiniWr {
+  margin-left: auto;
+  text-align: right;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.wrGood {
+  color: #4ade80;
+}
+
+.wrOk {
+  color: #fbbf24;
+}
+
+.wrBad {
+  color: #f87171;
+}
+
+.masteryBadge {
+  margin-left: auto;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 12px;
+  font-weight: 800;
+  font-family: 'Syne', sans-serif;
+}
+
+.m7 {
+  background: rgba(239, 68, 68, 0.2);
+  color: #f87171;
+  border: 1px solid rgba(239, 68, 68, 0.3);
+}
+
+.m6 {
+  background: rgba(245, 158, 11, 0.2);
+  color: #fbbf24;
+  border: 1px solid rgba(245, 158, 11, 0.3);
+}
+
+.m5 {
+  background: rgba(79, 110, 247, 0.2);
+  color: #a5b4fc;
+  border: 1px solid rgba(79, 110, 247, 0.3);
+}
+
+.pageHeader {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  margin-bottom: 32px;
+}
+
+.pageHeader h1 {
+  font-family: 'Syne', sans-serif;
+  font-size: 28px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.pageHeader p {
+  color: rgba(255, 255, 255, 0.4);
+  font-size: 14px;
+}
+
+.btnAdd {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 20px;
+  background: #4f6ef7;
+  border: none;
+  border-radius: 8px;
+  color: #fff;
+  font-family: 'Inter', sans-serif;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  text-decoration: none;
+  transition: background 0.2s;
+}
+
+.btnAdd:hover {
+  background: #3d5ce8;
+}
+
+.filters {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  flex-wrap: wrap;
+}
+
+.searchBox {
+  flex: 1;
+  max-width: 280px;
+  position: relative;
+}
+
+.searchBox input {
+  width: 100%;
+  padding: 9px 14px 9px 36px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: #fff;
+  font-size: 13px;
+  outline: none;
+  font-family: 'Inter', sans-serif;
+}
+
+.searchBox::before {
+  content: '🔍';
+  position: absolute;
+  left: 12px;
+  top: 50%;
+  transform: translateY(-50%);
+  font-size: 12px;
+}
+
+.filterBtn {
+  padding: 9px 16px;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  border-radius: 8px;
+  color: rgba(255, 255, 255, 0.6);
+  font-family: 'Inter', sans-serif;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.filterBtnActive {
+  background: rgba(79, 110, 247, 0.15);
+  border-color: rgba(79, 110, 247, 0.4);
+  color: #a5b4fc;
+}
+
+.tableWrap {
+  background: rgba(255, 255, 255, 0.03);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+  border-radius: 14px;
+  overflow: hidden;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.table thead tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+.table th {
+  padding: 14px 20px;
+  text-align: left;
+  font-size: 11px;
+  font-weight: 600;
+  color: rgba(255, 255, 255, 0.3);
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+}
+
+.table tbody tr {
+  border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+  transition: background 0.15s;
+  cursor: pointer;
+}
+
+.table tbody tr:last-child {
+  border-bottom: none;
+}
+
+.table tbody tr:hover {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+.table td {
+  padding: 16px 20px;
+  font-size: 14px;
+}
+
+.champCell {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.champAvatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 10px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 18px;
+  flex-shrink: 0;
+}
+
+.champName {
+  font-weight: 500;
+}
+
+.champRole {
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.35);
+  margin-top: 2px;
+}
+
+.winPill {
+  display: inline-flex;
+  padding: 4px 10px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 600;
+}
+
+.win {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.loss {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.kda {
+  font-weight: 500;
+}
+
+.kda span {
+  color: rgba(255, 255, 255, 0.35);
+  font-weight: 400;
+}
+
+.scoreBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 42px;
+  height: 42px;
+  border-radius: 10px;
+  font-family: 'Syne', sans-serif;
+  font-weight: 700;
+  font-size: 15px;
+}
+
+.scoreHigh {
+  background: rgba(34, 197, 94, 0.15);
+  color: #4ade80;
+}
+
+.scoreMid {
+  background: rgba(245, 158, 11, 0.15);
+  color: #fbbf24;
+}
+
+.scoreLow {
+  background: rgba(239, 68, 68, 0.15);
+  color: #f87171;
+}
+
+.actions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionBtn {
+  padding: 6px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+  border: none;
+  font-family: 'Inter', sans-serif;
+  text-decoration: none;
+  transition: all 0.15s;
+}
+
+.btnView {
+  background: rgba(79, 110, 247, 0.15);
+  color: #a5b4fc;
+}
+
+.btnView:hover {
+  background: rgba(79, 110, 247, 0.25);
+}
+
+.btnEdit {
+  background: rgba(245, 158, 11, 0.12);
+  color: #fbbf24;
+}
+
+.btnEdit:hover {
+  background: rgba(245, 158, 11, 0.22);
+}
+
+.btnDelete {
+  background: rgba(239, 68, 68, 0.12);
+  color: #f87171;
+}
+
+.btnDelete:hover {
+  background: rgba(239, 68, 68, 0.22);
+}
+
+.pagination {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 24px;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.paginationInfo {
+  font-size: 13px;
+  color: rgba(255, 255, 255, 0.35);
+}
+
+.paginationControls {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.pageBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 7px;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  background: transparent;
+  color: rgba(255, 255, 255, 0.5);
+  font-size: 13px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: 'Inter', sans-serif;
+  transition: all 0.15s;
+}
+
+.pageBtn:hover {
+  background: rgba(255, 255, 255, 0.06);
+}
+
+.pageBtnActive {
+  background: #4f6ef7;
+  border-color: #4f6ef7;
+  color: #fff;
+}
+
+.pageBtn:disabled {
+  opacity: 0.3;
+  cursor: not-allowed;
+}
+
+@media (max-width: 1120px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .sidebar {
+    order: 2;
+  }
+}
+
+@media (max-width: 760px) {
+  .nav,
+  .main {
+    padding-left: 18px;
+    padding-right: 18px;
+  }
+
+  .pageHeader {
+    flex-direction: column;
+    gap: 12px;
+  }
+
+  .tableWrap {
+    overflow-x: auto;
+  }
+
+  .table {
+    min-width: 980px;
+  }
+}

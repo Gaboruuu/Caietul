@@ -1,0 +1,430 @@
+@import url("https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=Inter:wght@300;400;500&display=swap");
+
+.page {
+    font-family: "Inter", sans-serif;
+    background: #0a0e1a;
+    color: #fff;
+    min-height: 100vh;
+}
+
+.nav {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 48px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+    background: rgba(10, 14, 26, 0.95);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    text-decoration: none;
+    color: #fff;
+}
+
+.logoIcon {
+    width: 36px;
+    height: 36px;
+    background: linear-gradient(135deg, #4f6ef7, #7c3aed);
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: "Syne", sans-serif;
+    font-weight: 800;
+    font-size: 16px;
+}
+
+.logoText {
+    font-family: "Syne", sans-serif;
+    font-weight: 700;
+    font-size: 18px;
+}
+
+.navActions {
+    display: flex;
+    gap: 10px;
+}
+
+.btn {
+    padding: 9px 18px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 500;
+    cursor: pointer;
+    font-family: "Inter", sans-serif;
+    text-decoration: none;
+    border: none;
+    transition: all 0.2s;
+}
+
+.btnGhost {
+    background: rgba(255, 255, 255, 0.05);
+    color: rgba(255, 255, 255, 0.6);
+    border: 1px solid rgba(255, 255, 255, 0.08);
+}
+
+.btnEdit {
+    background: rgba(245, 158, 11, 0.12);
+    color: #fbbf24;
+    border: 1px solid rgba(245, 158, 11, 0.2);
+}
+
+.btnDelete {
+    background: rgba(239, 68, 68, 0.12);
+    color: #f87171;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.main {
+    max-width: 1000px;
+    margin: 0 auto;
+    padding: 36px 48px;
+}
+
+.back {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    color: rgba(255, 255, 255, 0.4);
+    font-size: 13px;
+    text-decoration: none;
+    margin-bottom: 28px;
+    transition: color 0.2s;
+}
+
+.back:hover {
+    color: #fff;
+}
+
+.matchHeader {
+    border-radius: 16px;
+    padding: 32px 36px;
+    margin-bottom: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.headerWin {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.15), rgba(16, 185, 129, 0.08));
+    border: 1px solid rgba(34, 197, 94, 0.2);
+}
+
+.headerLoss {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.15), rgba(220, 38, 38, 0.08));
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}
+
+.headerLeft {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+}
+
+.resultText {
+    font-family: "Syne", sans-serif;
+    font-size: 36px;
+    font-weight: 800;
+}
+
+.winText {
+    color: #4ade80;
+}
+
+.meta {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.metaItem {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.metaItem span {
+    color: rgba(255, 255, 255, 0.8);
+    font-weight: 500;
+}
+
+.scoreCircle {
+    width: 90px;
+    height: 90px;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.08);
+    border: 3px solid rgba(79, 110, 247, 0.4);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.scoreNum {
+    font-family: "Syne", sans-serif;
+    font-size: 28px;
+    font-weight: 800;
+}
+
+.scoreLabel {
+    font-size: 10px;
+    color: rgba(255, 255, 255, 0.4);
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+}
+
+.grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 16px;
+    margin-bottom: 16px;
+}
+
+.card {
+    background: rgba(255, 255, 255, 0.03);
+    border: 1px solid rgba(255, 255, 255, 0.07);
+    border-radius: 14px;
+    padding: 24px;
+}
+
+.card h3 {
+    font-family: "Syne", sans-serif;
+    font-size: 15px;
+    font-weight: 600;
+    margin-bottom: 20px;
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.statRow {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 16px;
+}
+
+.statRow:last-child {
+    margin-bottom: 0;
+}
+
+.statName {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.4);
+}
+
+.statBarWrap {
+    flex: 1;
+    margin: 0 16px;
+    height: 6px;
+    background: rgba(255, 255, 255, 0.08);
+    border-radius: 3px;
+    overflow: hidden;
+}
+
+.statBar {
+    height: 100%;
+    border-radius: 3px;
+}
+
+.barGreen {
+    background: #4ade80;
+}
+
+.barYellow {
+    background: #fbbf24;
+}
+
+.barBlue {
+    background: #60a5fa;
+}
+
+.statVal {
+    font-size: 13px;
+    font-weight: 600;
+    min-width: 60px;
+    text-align: right;
+}
+
+.statDelta {
+    font-size: 11px;
+    margin-left: 6px;
+}
+
+.up {
+    color: #4ade80;
+}
+
+.down {
+    color: #f87171;
+}
+
+.highlightRow {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 12px;
+    margin-top: 16px;
+}
+
+.highlightCard {
+    padding: 16px;
+    border-radius: 10px;
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+}
+
+.hlWin {
+    background: rgba(34, 197, 94, 0.08);
+    border: 1px solid rgba(34, 197, 94, 0.15);
+}
+
+.hlWarn {
+    background: rgba(245, 158, 11, 0.08);
+    border: 1px solid rgba(245, 158, 11, 0.15);
+}
+
+.hlIcon {
+    font-size: 18px;
+}
+
+.hlTitle {
+    font-size: 12px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.hlWin .hlTitle {
+    color: #4ade80;
+}
+
+.hlWarn .hlTitle {
+    color: #fbbf24;
+}
+
+.hlDesc {
+    font-size: 12px;
+    color: rgba(255, 255, 255, 0.45);
+    line-height: 1.5;
+}
+
+.tipItem {
+    display: flex;
+    gap: 10px;
+    align-items: flex-start;
+    padding: 12px 0;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.tipItem:last-child {
+    border-bottom: none;
+}
+
+.tipDot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    margin-top: 5px;
+    flex-shrink: 0;
+}
+
+.dotGreen {
+    background: #4ade80;
+}
+
+.dotYellow {
+    background: #fbbf24;
+}
+
+.dotBlue {
+    background: #60a5fa;
+}
+
+.tipText {
+    font-size: 13px;
+    color: rgba(255, 255, 255, 0.65);
+    line-height: 1.5;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+}
+
+.table th {
+    padding: 12px 16px;
+    text-align: left;
+    font-size: 11px;
+    font-weight: 600;
+    color: rgba(255, 255, 255, 0.3);
+    text-transform: uppercase;
+    letter-spacing: 0.8px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.table td {
+    padding: 14px 16px;
+    font-size: 13px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.table tr:last-child td {
+    border-bottom: none;
+}
+
+.me td {
+    background: rgba(79, 110, 247, 0.08);
+}
+
+.teamHeader {
+    padding: 10px 16px;
+    font-size: 12px;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+}
+
+.blueHeader {
+    background: rgba(59, 130, 246, 0.1);
+    color: #93c5fd;
+    border-bottom: 1px solid rgba(59, 130, 246, 0.15);
+}
+
+.redHeader {
+    margin-top: 16px;
+    background: rgba(239, 68, 68, 0.1);
+    color: #fca5a5;
+    border-bottom: 1px solid rgba(239, 68, 68, 0.15);
+}
+
+@media (max-width: 900px) {
+
+    .nav,
+    .main {
+        padding-left: 20px;
+        padding-right: 20px;
+    }
+
+    .grid2 {
+        grid-template-columns: 1fr;
+    }
+
+    .matchHeader {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 16px;
+    }
+
+    .headerLeft {
+        flex-direction: column;
+        align-items: flex-start;
+        gap: 12px;
+    }
+
+    .navActions {
+        flex-wrap: wrap;
+        justify-content: flex-end;
+    }
+}
