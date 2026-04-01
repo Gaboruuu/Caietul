@@ -1,8 +1,7 @@
-import { Link } from "react-router-dom";
-import { useState, useEffect } from "react";
+import { Link, useNavigate } from "react-router-dom";
+import { useMemo, useState } from "react";
 import styles from "../styles/MatchHomePage.module.css";
 import { matchStore, formatDuration } from "../store/matchStore";
-import type { Match } from "../types/match";
 import RankBlock from "../components/matchHome/RankBlock";
 import ChampMiniRow from "../components/matchHome/ChampMiniRow";
 import MasteryRow from "../components/matchHome/MasteryRow";
@@ -105,17 +104,13 @@ const CHAMPION_MASTERY = [
 ] as const;
 
 export default function MatchHomePage() {
+  const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
-  const [pageData, setPageData] = useState<{
-    items: Match[];
-    total: number;
-    totalPages: number;
-  }>({ items: [], total: 0, totalPages: 0 });
 
-  useEffect(() => {
-    const data = matchStore.getPage(currentPage, PAGE_SIZE);
-    setPageData(data);
-  }, [currentPage]);
+  const pageData = useMemo(
+    () => matchStore.getPage(currentPage, PAGE_SIZE),
+    [currentPage],
+  );
 
   return (
     <>
@@ -251,7 +246,18 @@ export default function MatchHomePage() {
                 </thead>
                 <tbody>
                   {pageData.items.map((match) => (
-                    <tr key={match.id}>
+                    <tr
+                      key={match.id}
+                      onClick={() => navigate(`/matches/${match.id}`)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter" || e.key === " ") {
+                          e.preventDefault();
+                          navigate(`/matches/${match.id}`);
+                        }
+                      }}
+                      role="link"
+                      tabIndex={0}
+                    >
                       <td>
                         <div className={styles.champCell}>
                           <div className={styles.champAvatar}>
@@ -288,7 +294,10 @@ export default function MatchHomePage() {
                       <td>{new Date(match.date).toLocaleDateString()}</td>
                       <td>{match.visionScore}</td>
                       <td>
-                        <div className={styles.actions}>
+                        <div
+                          className={styles.actions}
+                          onClick={(e) => e.stopPropagation()}
+                        >
                           <Link
                             to={`/matches/${match.id}`}
                             className={`${styles.actionBtn} ${styles.btnView}`}

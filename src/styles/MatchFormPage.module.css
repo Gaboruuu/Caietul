@@ -144,6 +144,21 @@
     background: rgba(79, 110, 247, 0.05);
 }
 
+.inputError {
+    border-color: rgba(239, 68, 68, 0.6);
+}
+
+.inputError:focus {
+    border-color: rgba(239, 68, 68, 0.85);
+    background: rgba(239, 68, 68, 0.08);
+}
+
+.errorText {
+    margin-top: 8px;
+    font-size: 12px;
+    color: #f87171;
+}
+
 .input::placeholder {
     color: rgba(255, 255, 255, 0.2);
 }

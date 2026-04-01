@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import styles from "../styles/MatchFormPage.module.css";
 import {
@@ -7,59 +7,130 @@ import {
   isValid,
   type ValidationErrors,
 } from "../store/matchStore";
-import { ROLES, RESULTS, type Match, type Role, type Result } from "../types/match";
+import {
+  ROLES,
+  RESULTS,
+  type Match,
+  type Role,
+  type Result,
+} from "../types/match";
+
+type MatchFormValues = {
+  champion: string;
+  role: Role;
+  result: Result;
+  kills: string;
+  deaths: string;
+  assists: string;
+  cs: string;
+  visionScore: string;
+  durationMins: string;
+  durationSecs: string;
+  dateInput: string;
+  patch: string;
+  notes: string;
+};
+
+type NumberFieldConfig = {
+  key: "kills" | "deaths" | "assists" | "cs" | "visionScore";
+  label: string;
+  min: number;
+  max: number;
+};
+
+const toDateTimeInput = (isoDate?: string): string => {
+  if (!isoDate) {
+    return "";
+  }
+
+  const date = new Date(isoDate);
+  if (Number.isNaN(date.getTime())) {
+    return "";
+  }
+
+  const timezoneOffsetMs = date.getTimezoneOffset() * 60 * 1000;
+  return new Date(date.getTime() - timezoneOffsetMs).toISOString().slice(0, 16);
+};
+
+const fromDateTimeInput = (value: string): string => {
+  if (!value) {
+    return "";
+  }
+
+  const date = new Date(value);
+  return Number.isNaN(date.getTime()) ? "" : date.toISOString();
+};
+
+const getInitialFormValues = (match: Match | null): MatchFormValues => ({
+  champion: match?.champion ?? "",
+  role: match?.role ?? "Mid",
+  result: match?.result ?? "Victory",
+  kills: match ? String(match.kills) : "",
+  deaths: match ? String(match.deaths) : "",
+  assists: match ? String(match.assists) : "",
+  cs: match ? String(match.cs) : "",
+  visionScore: match ? String(match.visionScore) : "",
+  durationMins: match ? String(Math.floor(match.duration / 60)) : "",
+  durationSecs: match ? String(match.duration % 60) : "",
+  dateInput: toDateTimeInput(match?.date),
+  patch: match?.patch ?? "",
+  notes: match?.notes ?? "",
+});
+
+const numberFieldConfig: NumberFieldConfig[] = [
+  { key: "kills", label: "Kills", min: 0, max: 99 },
+  { key: "deaths", label: "Deaths", min: 0, max: 99 },
+  { key: "assists", label: "Assists", min: 0, max: 99 },
+  { key: "cs", label: "CS", min: 0, max: 1500 },
+  { key: "visionScore", label: "Vision Score", min: 0, max: 300 },
+];
 
 export default function MatchFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
-  const match = isEditing ? matchStore.getById(id!) : null;
+  const match = isEditing ? (matchStore.getById(id!) ?? null) : null;
 
-  // Form state
-  const [champion, setChampion] = useState(match?.champion || "");
-  const [role, setRole] = useState<Role>(match?.role || "Mid");
-  const [result, setResult] = useState<Result>(match?.result || "Victory");
-  const [kills, setKills] = useState(match?.kills.toString() || "");
-  const [deaths, setDeaths] = useState(match?.deaths.toString() || "");
-  const [assists, setAssists] = useState(match?.assists.toString() || "");
-  const [cs, setCs] = useState(match?.cs.toString() || "");
-  const [visionScore, setVisionScore] = useState(
-    match?.visionScore.toString() || "",
-  );
-  const [durationMins, setDurationMins] = useState(
-    match ? Math.floor(match.duration / 60).toString() : "",
-  );
-  const [durationSecs, setDurationSecs] = useState(
-    match ? (match.duration % 60).toString() : "",
-  );
-  const [date, setDate] = useState(match?.date || "");
-  const [patch, setPatch] = useState(match?.patch || "");
-  const [notes, setNotes] = useState(match?.notes || "");
+  const initialValues = useMemo(() => getInitialFormValues(match), [match]);
+  const [form, setForm] = useState<MatchFormValues>(initialValues);
   const [errors, setErrors] = useState<ValidationErrors>({});
+
+  useEffect(() => {
+    setForm(initialValues);
+  }, [initialValues]);
+
+  const setField = <K extends keyof MatchFormValues>(
+    key: K,
+    value: MatchFormValues[K],
+  ) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const inputClass = (hasError: boolean) =>
+    `${styles.input} ${hasError ? styles.inputError : ""}`;
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
 
-    // Convert duration to seconds
     const totalSeconds =
-      (parseInt(durationMins) || 0) * 60 + (parseInt(durationSecs) || 0);
+      (parseInt(form.durationMins, 10) || 0) * 60 +
+      (parseInt(form.durationSecs, 10) || 0);
 
     const matchData: Omit<Match, "id"> = {
-      champion: champion.trim(),
-      role,
-      result,
-      kills: parseInt(kills) || 0,
-      deaths: parseInt(deaths) || 0,
-      assists: parseInt(assists) || 0,
-      cs: parseInt(cs) || 0,
-      visionScore: parseInt(visionScore) || 0,
+      champion: form.champion.trim(),
+      role: form.role,
+      result: form.result,
+      kills: parseInt(form.kills, 10) || 0,
+      deaths: parseInt(form.deaths, 10) || 0,
+      assists: parseInt(form.assists, 10) || 0,
+      cs: parseInt(form.cs, 10) || 0,
+      visionScore: parseInt(form.visionScore, 10) || 0,
       duration: totalSeconds,
-      date: date || new Date().toISOString(),
-      patch: patch.trim(),
-      notes: notes.trim() || undefined,
+      date: fromDateTimeInput(form.dateInput) || new Date().toISOString(),
+      patch: form.patch.trim(),
+      notes: form.notes.trim() || undefined,
     };
 
-    // Validate
     const validationErrors = validateMatch(matchData);
     if (!isValid(validationErrors)) {
       setErrors(validationErrors);
@@ -67,8 +138,6 @@ export default function MatchFormPage() {
     }
 
     setErrors({});
-
-    // Save
     if (isEditing && match) {
       matchStore.update(match.id, matchData);
     } else {
@@ -110,10 +179,10 @@ export default function MatchFormPage() {
                 </label>
                 <input
                   id="champion"
-                  className={`${styles.input} ${errors.champion ? "error" : ""}`}
+                  className={inputClass(!!errors.champion)}
                   type="text"
-                  value={champion}
-                  onChange={(e) => setChampion(e.target.value)}
+                  value={form.champion}
+                  onChange={(e) => setField("champion", e.target.value)}
                   placeholder="e.g. Syndra"
                 />
                 {errors.champion && (
@@ -128,8 +197,8 @@ export default function MatchFormPage() {
                 <select
                   id="role"
                   className={styles.select}
-                  value={role}
-                  onChange={(e) => setRole(e.target.value as Role)}
+                  value={form.role}
+                  onChange={(e) => setField("role", e.target.value as Role)}
                 >
                   {ROLES.map((r) => (
                     <option key={r} value={r}>
@@ -148,8 +217,8 @@ export default function MatchFormPage() {
                 <select
                   id="result"
                   className={styles.select}
-                  value={result}
-                  onChange={(e) => setResult(e.target.value as Result)}
+                  value={form.result}
+                  onChange={(e) => setField("result", e.target.value as Result)}
                 >
                   {RESULTS.map((r) => (
                     <option key={r} value={r}>
@@ -165,12 +234,10 @@ export default function MatchFormPage() {
                 </label>
                 <input
                   id="date"
-                  className={`${styles.input} ${errors.date ? "error" : ""}`}
+                  className={inputClass(!!errors.date)}
                   type="datetime-local"
-                  value={date ? new Date(date).toISOString().slice(0, 16) : ""}
-                  onChange={(e) =>
-                    setDate(new Date(e.target.value).toISOString())
-                  }
+                  value={form.dateInput}
+                  onChange={(e) => setField("dateInput", e.target.value)}
                 />
                 {errors.date && (
                   <div className={styles.errorText}>{errors.date}</div>
@@ -185,10 +252,10 @@ export default function MatchFormPage() {
                 </label>
                 <input
                   id="patch"
-                  className={`${styles.input} ${errors.patch ? "error" : ""}`}
+                  className={inputClass(!!errors.patch)}
                   type="text"
-                  value={patch}
-                  onChange={(e) => setPatch(e.target.value)}
+                  value={form.patch}
+                  onChange={(e) => setField("patch", e.target.value)}
                   placeholder="e.g. 14.8"
                 />
                 {errors.patch && (
@@ -202,108 +269,56 @@ export default function MatchFormPage() {
             <div className={styles.cardTitle}>Your Stats</div>
 
             <div className={styles.grid3}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="kills">
-                  Kills
-                </label>
-                <input
-                  id="kills"
-                  className={`${styles.input} ${errors.kills ? "error" : ""}`}
-                  type="number"
-                  value={kills}
-                  onChange={(e) => setKills(e.target.value)}
-                  min={0}
-                  max={99}
-                />
-                {errors.kills && (
-                  <div className={styles.errorText}>{errors.kills}</div>
-                )}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="deaths">
-                  Deaths
-                </label>
-                <input
-                  id="deaths"
-                  className={`${styles.input} ${errors.deaths ? "error" : ""}`}
-                  type="number"
-                  value={deaths}
-                  onChange={(e) => setDeaths(e.target.value)}
-                  min={0}
-                  max={99}
-                />
-                {errors.deaths && (
-                  <div className={styles.errorText}>{errors.deaths}</div>
-                )}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="assists">
-                  Assists
-                </label>
-                <input
-                  id="assists"
-                  className={`${styles.input} ${errors.assists ? "error" : ""}`}
-                  type="number"
-                  value={assists}
-                  onChange={(e) => setAssists(e.target.value)}
-                  min={0}
-                  max={99}
-                />
-                {errors.assists && (
-                  <div className={styles.errorText}>{errors.assists}</div>
-                )}
-              </div>
+              {numberFieldConfig.slice(0, 3).map((field) => (
+                <div className={styles.field} key={field.key}>
+                  <label className={styles.label} htmlFor={field.key}>
+                    {field.label}
+                  </label>
+                  <input
+                    id={field.key}
+                    className={inputClass(!!errors[field.key])}
+                    type="number"
+                    value={form[field.key]}
+                    onChange={(e) => setField(field.key, e.target.value)}
+                    min={field.min}
+                    max={field.max}
+                  />
+                  {errors[field.key] && (
+                    <div className={styles.errorText}>{errors[field.key]}</div>
+                  )}
+                </div>
+              ))}
             </div>
 
             <div className={styles.grid3}>
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="cs">
-                  CS
-                </label>
-                <input
-                  id="cs"
-                  className={`${styles.input} ${errors.cs ? "error" : ""}`}
-                  type="number"
-                  value={cs}
-                  onChange={(e) => setCs(e.target.value)}
-                  min={0}
-                  max={1500}
-                />
-                {errors.cs && (
-                  <div className={styles.errorText}>{errors.cs}</div>
-                )}
-              </div>
-
-              <div className={styles.field}>
-                <label className={styles.label} htmlFor="visionScore">
-                  Vision Score
-                </label>
-                <input
-                  id="visionScore"
-                  className={`${styles.input} ${
-                    errors.visionScore ? "error" : ""
-                  }`}
-                  type="number"
-                  value={visionScore}
-                  onChange={(e) => setVisionScore(e.target.value)}
-                  min={0}
-                  max={300}
-                />
-                {errors.visionScore && (
-                  <div className={styles.errorText}>{errors.visionScore}</div>
-                )}
-              </div>
+              {numberFieldConfig.slice(3).map((field) => (
+                <div className={styles.field} key={field.key}>
+                  <label className={styles.label} htmlFor={field.key}>
+                    {field.label}
+                  </label>
+                  <input
+                    id={field.key}
+                    className={inputClass(!!errors[field.key])}
+                    type="number"
+                    value={form[field.key]}
+                    onChange={(e) => setField(field.key, e.target.value)}
+                    min={field.min}
+                    max={field.max}
+                  />
+                  {errors[field.key] && (
+                    <div className={styles.errorText}>{errors[field.key]}</div>
+                  )}
+                </div>
+              ))}
 
               <div className={styles.field}>
                 <label className={styles.label}>Duration (mm:ss)</label>
                 <div style={{ display: "flex", gap: "8px" }}>
                   <input
-                    className={`${styles.input} ${errors.duration ? "error" : ""}`}
+                    className={inputClass(!!errors.duration)}
                     type="number"
-                    value={durationMins}
-                    onChange={(e) => setDurationMins(e.target.value)}
+                    value={form.durationMins}
+                    onChange={(e) => setField("durationMins", e.target.value)}
                     placeholder="mm"
                     min={0}
                     max={120}
@@ -311,10 +326,10 @@ export default function MatchFormPage() {
                   />
                   <span style={{ alignSelf: "center" }}>:</span>
                   <input
-                    className={`${styles.input} ${errors.duration ? "error" : ""}`}
+                    className={inputClass(!!errors.duration)}
                     type="number"
-                    value={durationSecs}
-                    onChange={(e) => setDurationSecs(e.target.value)}
+                    value={form.durationSecs}
+                    onChange={(e) => setField("durationSecs", e.target.value)}
                     placeholder="ss"
                     min={0}
                     max={59}
@@ -338,8 +353,8 @@ export default function MatchFormPage() {
                 id="notes"
                 className={styles.input}
                 type="text"
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
+                value={form.notes}
+                onChange={(e) => setField("notes", e.target.value)}
                 placeholder="e.g. Good early game, bad teamfights..."
               />
             </div>
