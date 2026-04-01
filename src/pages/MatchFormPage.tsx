@@ -7,10 +7,7 @@ import {
   isValid,
   type ValidationErrors,
 } from "../store/matchStore";
-import type { Match, Role, Result } from "../types/match";
-
-const ROLES: Role[] = ["Top", "Jungle", "Mid", "Bot", "Support"];
-const RESULTS: Result[] = ["Victory", "Defeat", "Remake"];
+import { ROLES, RESULTS, type Match, type Role, type Result } from "../types/match";
 
 export default function MatchFormPage() {
   const { id } = useParams<{ id: string }>();

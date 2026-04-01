@@ -3,8 +3,106 @@ import { useState, useEffect } from "react";
 import styles from "../styles/MatchHomePage.module.css";
 import { matchStore, formatDuration } from "../store/matchStore";
 import type { Match } from "../types/match";
+import RankBlock from "../components/matchHome/RankBlock";
+import ChampMiniRow from "../components/matchHome/ChampMiniRow";
+import MasteryRow from "../components/matchHome/MasteryRow";
 
 const PAGE_SIZE = 10;
+
+const RANKED_QUEUES = [
+  {
+    queueType: "Solo / Duo",
+    rankName: "Diamond III",
+    lp: "67 LP",
+    wins: "134W",
+    losses: "114L",
+    winRate: "54.1%",
+    alt: false,
+  },
+  {
+    queueType: "Flex 5v5",
+    rankName: "Platinum I",
+    lp: "88 LP",
+    wins: "62W",
+    losses: "58L",
+    winRate: "51.7%",
+    alt: true,
+  },
+] as const;
+
+const MOST_PLAYED = [
+  {
+    icon: "⚔️",
+    bgClass: styles.bgYasuo,
+    name: "Yasuo",
+    sub: "Mid · 48 games",
+    wr: "58%",
+    wrClass: styles.wrGood,
+    kda: "4.1 KDA",
+  },
+  {
+    icon: "🦊",
+    bgClass: styles.bgAhri,
+    name: "Ahri",
+    sub: "Mid · 34 games",
+    wr: "62%",
+    wrClass: styles.wrGood,
+    kda: "5.3 KDA",
+  },
+  {
+    icon: "🗡️",
+    bgClass: styles.bgZed,
+    name: "Zed",
+    sub: "Mid · 27 games",
+    wr: "48%",
+    wrClass: styles.wrOk,
+    kda: "3.2 KDA",
+  },
+  {
+    icon: "🐉",
+    bgClass: styles.bgLeeSin,
+    name: "Lee Sin",
+    sub: "Jungle · 19 games",
+    wr: "42%",
+    wrClass: styles.wrBad,
+    kda: "3.8 KDA",
+  },
+] as const;
+
+const CHAMPION_MASTERY = [
+  {
+    icon: "⚔️",
+    bgClass: styles.bgYasuo,
+    name: "Yasuo",
+    points: "412,800 pts",
+    badge: "7",
+    badgeClass: styles.m7,
+  },
+  {
+    icon: "🦊",
+    bgClass: styles.bgAhri,
+    name: "Ahri",
+    points: "284,500 pts",
+    badge: "7",
+    badgeClass: styles.m7,
+  },
+  {
+    icon: "🗡️",
+    bgClass: styles.bgZed,
+    name: "Zed",
+    points: "198,200 pts",
+    badge: "6",
+    badgeClass: styles.m6,
+  },
+  {
+    icon: "🐉",
+    bgClass: styles.bgLeeSin,
+    name: "Lee Sin",
+    points: "134,100 pts",
+    badge: "5",
+    badgeClass: styles.m5,
+  },
+] as const;
 
 export default function MatchHomePage() {
   const [currentPage, setCurrentPage] = useState(1);
@@ -43,210 +141,71 @@ export default function MatchHomePage() {
                 <div className={styles.profileName}>ShadowBlade</div>
                 <div className={styles.profileTag}>#EUW</div>
                 <div className={styles.profileMeta}>
-                  <span className={`${styles.metaPill} ${styles.level}`}>
+                  <span
+                    className={`${styles.metaPill} ${styles.metaPillLevel}`}
+                  >
                     Level 247
                   </span>
-                  <span className={`${styles.metaPill} ${styles.server}`}>
+                  <span
+                    className={`${styles.metaPill} ${styles.metaPillServer}`}
+                  >
                     EUW
                   </span>
                 </div>
               </div>
-              <div
-                style={{
-                  display: "flex",
-                  justifyContent: "space-between",
-                  fontSize: 12,
-                  color: "rgba(255,255,255,0.4)",
-                }}
-              >
+              <div className={styles.profileStats}>
                 <span>54.2% WR overall</span>
                 <span>
-                  Score avg <strong style={{ color: "#a5b4fc" }}>78</strong>
+                  Score avg <strong>78</strong>
                 </span>
               </div>
             </div>
 
             <div className={styles.sidebarCard}>
               <div className={styles.sectionLabel}>Ranked</div>
-
-              <div className={styles.rankBlock}>
-                <div className={styles.rankIcon}>💎</div>
-                <div className={styles.rankInfo}>
-                  <div className={styles.rankType}>Solo / Duo</div>
-                  <div className={styles.rankName}>Diamond III</div>
-                  <div className={styles.rankLp}>67 LP</div>
-                  <div className={styles.rankWl}>
-                    <span className={styles.wlWins}>134W</span>
-                    <span className={styles.wlSep}>/</span>
-                    <span className={styles.wlLosses}>114L</span>
-                    <span className={styles.wlWr}>54.1%</span>
-                  </div>
-                </div>
-              </div>
-
-              <div className={styles.rankBlock}>
-                <div
-                  className={styles.rankIcon}
-                  style={{
-                    background:
-                      "linear-gradient(135deg,rgba(167,139,250,0.15),rgba(124,58,237,0.15))",
-                    borderColor: "rgba(167,139,250,0.2)",
-                  }}
-                >
-                  💎
-                </div>
-                <div className={styles.rankInfo}>
-                  <div className={styles.rankType}>Flex 5v5</div>
-                  <div className={styles.rankName}>Platinum I</div>
-                  <div className={styles.rankLp}>88 LP</div>
-                  <div className={styles.rankWl}>
-                    <span className={styles.wlWins}>62W</span>
-                    <span className={styles.wlSep}>/</span>
-                    <span className={styles.wlLosses}>58L</span>
-                    <span className={styles.wlWr}>51.7%</span>
-                  </div>
-                </div>
-              </div>
+              {RANKED_QUEUES.map((queue) => (
+                <RankBlock
+                  key={queue.queueType}
+                  queueType={queue.queueType}
+                  rankName={queue.rankName}
+                  lp={queue.lp}
+                  wins={queue.wins}
+                  losses={queue.losses}
+                  winRate={queue.winRate}
+                  alt={queue.alt}
+                />
+              ))}
             </div>
 
             <div className={styles.sidebarCard}>
               <div className={styles.sectionLabel}>Most Played</div>
-
-              <div className={styles.champRow}>
-                <div
-                  className={styles.champMiniIcon}
-                  style={{ background: "rgba(255,200,50,0.12)" }}
-                >
-                  ⚔️
-                </div>
-                <div>
-                  <div className={styles.champMiniName}>Yasuo</div>
-                  <div className={styles.champMiniSub}>Mid · 48 games</div>
-                </div>
-                <div>
-                  <div className={`${styles.champMiniWr} ${styles.wrGood}`}>
-                    58%
-                  </div>
-                  <div className={styles.champMiniGames}>4.1 KDA</div>
-                </div>
-              </div>
-
-              <div className={styles.champRow}>
-                <div
-                  className={styles.champMiniIcon}
-                  style={{ background: "rgba(200,100,255,0.12)" }}
-                >
-                  🦊
-                </div>
-                <div>
-                  <div className={styles.champMiniName}>Ahri</div>
-                  <div className={styles.champMiniSub}>Mid · 34 games</div>
-                </div>
-                <div>
-                  <div className={`${styles.champMiniWr} ${styles.wrGood}`}>
-                    62%
-                  </div>
-                  <div className={styles.champMiniGames}>5.3 KDA</div>
-                </div>
-              </div>
-
-              <div className={styles.champRow}>
-                <div
-                  className={styles.champMiniIcon}
-                  style={{ background: "rgba(100,100,100,0.18)" }}
-                >
-                  🗡️
-                </div>
-                <div>
-                  <div className={styles.champMiniName}>Zed</div>
-                  <div className={styles.champMiniSub}>Mid · 27 games</div>
-                </div>
-                <div>
-                  <div className={`${styles.champMiniWr} ${styles.wrOk}`}>
-                    48%
-                  </div>
-                  <div className={styles.champMiniGames}>3.2 KDA</div>
-                </div>
-              </div>
-
-              <div className={styles.champRow}>
-                <div
-                  className={styles.champMiniIcon}
-                  style={{ background: "rgba(255,150,50,0.12)" }}
-                >
-                  🐉
-                </div>
-                <div>
-                  <div className={styles.champMiniName}>Lee Sin</div>
-                  <div className={styles.champMiniSub}>Jungle · 19 games</div>
-                </div>
-                <div>
-                  <div className={`${styles.champMiniWr} ${styles.wrBad}`}>
-                    42%
-                  </div>
-                  <div className={styles.champMiniGames}>3.8 KDA</div>
-                </div>
-              </div>
+              {MOST_PLAYED.map((champion) => (
+                <ChampMiniRow
+                  key={champion.name}
+                  icon={champion.icon}
+                  bgClass={champion.bgClass}
+                  name={champion.name}
+                  sub={champion.sub}
+                  wr={champion.wr}
+                  wrClass={champion.wrClass}
+                  kda={champion.kda}
+                />
+              ))}
             </div>
 
             <div className={styles.sidebarCard}>
               <div className={styles.sectionLabel}>Champion Mastery</div>
-
-              <div className={styles.masteryRow}>
-                <div
-                  className={styles.masteryIcon}
-                  style={{ background: "rgba(255,200,50,0.12)" }}
-                >
-                  ⚔️
-                </div>
-                <div>
-                  <div className={styles.masteryName}>Yasuo</div>
-                  <div className={styles.masteryPts}>412,800 pts</div>
-                </div>
-                <div className={`${styles.masteryBadge} ${styles.m7}`}>7</div>
-              </div>
-
-              <div className={styles.masteryRow}>
-                <div
-                  className={styles.masteryIcon}
-                  style={{ background: "rgba(200,100,255,0.12)" }}
-                >
-                  🦊
-                </div>
-                <div>
-                  <div className={styles.masteryName}>Ahri</div>
-                  <div className={styles.masteryPts}>284,500 pts</div>
-                </div>
-                <div className={`${styles.masteryBadge} ${styles.m7}`}>7</div>
-              </div>
-
-              <div className={styles.masteryRow}>
-                <div
-                  className={styles.masteryIcon}
-                  style={{ background: "rgba(100,100,100,0.18)" }}
-                >
-                  🗡️
-                </div>
-                <div>
-                  <div className={styles.masteryName}>Zed</div>
-                  <div className={styles.masteryPts}>198,200 pts</div>
-                </div>
-                <div className={`${styles.masteryBadge} ${styles.m6}`}>6</div>
-              </div>
-
-              <div className={styles.masteryRow}>
-                <div
-                  className={styles.masteryIcon}
-                  style={{ background: "rgba(255,150,50,0.12)" }}
-                >
-                  🐉
-                </div>
-                <div>
-                  <div className={styles.masteryName}>Lee Sin</div>
-                  <div className={styles.masteryPts}>134,100 pts</div>
-                </div>
-                <div className={`${styles.masteryBadge} ${styles.m5}`}>5</div>
-              </div>
+              {CHAMPION_MASTERY.map((champion) => (
+                <MasteryRow
+                  key={champion.name}
+                  icon={champion.icon}
+                  bgClass={champion.bgClass}
+                  name={champion.name}
+                  points={champion.points}
+                  badge={champion.badge}
+                  badgeClass={champion.badgeClass}
+                />
+              ))}
             </div>
           </aside>
 
@@ -265,7 +224,9 @@ export default function MatchHomePage() {
               <div className={styles.searchBox}>
                 <input type="text" placeholder="Search champion..." />
               </div>
-              <button className={`${styles.filterBtn} ${styles.active}`}>
+              <button
+                className={`${styles.filterBtn} ${styles.filterBtnActive}`}
+              >
                 All
               </button>
               <button className={styles.filterBtn}>Wins</button>
@@ -275,7 +236,7 @@ export default function MatchHomePage() {
             </div>
 
             <div className={styles.tableWrap}>
-              <table>
+              <table className={styles.table}>
                 <thead>
                   <tr>
                     <th>Champion</th>
@@ -377,7 +338,7 @@ export default function MatchHomePage() {
                       <button
                         key={page}
                         className={`${styles.pageBtn} ${
-                          currentPage === page ? styles.active : ""
+                          currentPage === page ? styles.pageBtnActive : ""
                         }`}
                         onClick={() => setCurrentPage(page)}
                       >

@@ -30,55 +30,106 @@ export interface ValidationErrors {
   patch?: string;
 }
 
+const validateNumberInRange = (
+  value: number | null | undefined,
+  min: number,
+  max: number,
+  numberError: string,
+  rangeError: string,
+): string | undefined => {
+  if (value === undefined || value === null || Number.isNaN(value)) {
+    return numberError;
+  }
+
+  if (value < min || value > max) {
+    return rangeError;
+  }
+
+  return undefined;
+};
+
 export const validateMatch = (data: Partial<Match>): ValidationErrors => {
   const errors: ValidationErrors = {};
+
+  const setFieldError = (
+    field: keyof ValidationErrors,
+    message: string | undefined,
+  ) => {
+    if (message) {
+      errors[field] = message;
+    }
+  };
 
   if (!data.champion || data.champion.trim().length === 0)
     errors.champion = "Champion name is required.";
   else if (data.champion.trim().length > 30)
     errors.champion = "Champion name must be 30 characters or fewer.";
 
-  if (data.kills === undefined || data.kills === null || isNaN(data.kills))
-    errors.kills = "Kills must be a number.";
-  else if (data.kills < 0 || data.kills > 99)
-    errors.kills = "Kills must be between 0 and 99.";
+  setFieldError(
+    "kills",
+    validateNumberInRange(
+      data.kills,
+      0,
+      99,
+      "Kills must be a number.",
+      "Kills must be between 0 and 99.",
+    ),
+  );
 
-  if (data.deaths === undefined || data.deaths === null || isNaN(data.deaths))
-    errors.deaths = "Deaths must be a number.";
-  else if (data.deaths < 0 || data.deaths > 99)
-    errors.deaths = "Deaths must be between 0 and 99.";
+  setFieldError(
+    "deaths",
+    validateNumberInRange(
+      data.deaths,
+      0,
+      99,
+      "Deaths must be a number.",
+      "Deaths must be between 0 and 99.",
+    ),
+  );
 
-  if (
-    data.assists === undefined ||
-    data.assists === null ||
-    isNaN(data.assists)
-  )
-    errors.assists = "Assists must be a number.";
-  else if (data.assists < 0 || data.assists > 99)
-    errors.assists = "Assists must be between 0 and 99.";
+  setFieldError(
+    "assists",
+    validateNumberInRange(
+      data.assists,
+      0,
+      99,
+      "Assists must be a number.",
+      "Assists must be between 0 and 99.",
+    ),
+  );
 
-  if (data.cs === undefined || data.cs === null || isNaN(data.cs))
-    errors.cs = "CS must be a number.";
-  else if (data.cs < 0 || data.cs > 1500)
-    errors.cs = "CS must be between 0 and 1500.";
+  setFieldError(
+    "cs",
+    validateNumberInRange(
+      data.cs,
+      0,
+      1500,
+      "CS must be a number.",
+      "CS must be between 0 and 1500.",
+    ),
+  );
 
-  if (
-    data.visionScore === undefined ||
-    data.visionScore === null ||
-    isNaN(data.visionScore)
-  )
-    errors.visionScore = "Vision score must be a number.";
-  else if (data.visionScore < 0 || data.visionScore > 300)
-    errors.visionScore = "Vision score must be between 0 and 300.";
+  setFieldError(
+    "visionScore",
+    validateNumberInRange(
+      data.visionScore,
+      0,
+      300,
+      "Vision score must be a number.",
+      "Vision score must be between 0 and 300.",
+    ),
+  );
 
-  if (
-    data.duration === undefined ||
-    data.duration === null ||
-    isNaN(data.duration)
-  )
-    errors.duration = "Duration must be a number.";
-  else if (data.duration < 60 || data.duration > 7200)
-    errors.duration = "Duration must be between 1 and 120 minutes.";
+  setFieldError(
+    "duration",
+    validateNumberInRange(
+      data.duration,
+      60,
+      7200,
+      "Duration must be a number.",
+      "Duration must be between 1 and 120 minutes.",
+    ),
+  );
 
   if (!data.date || data.date.trim().length === 0)
     errors.date = "Date is required.";

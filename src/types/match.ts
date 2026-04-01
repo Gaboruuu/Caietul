@@ -1,5 +1,8 @@
-export type Role = "Top" | "Jungle" | "Mid" | "Bot" | "Support";
-export type Result = "Victory" | "Defeat" | "Remake";
+export const ROLES = ["Top", "Jungle", "Mid", "Bot", "Support"] as const;
+export type Role = (typeof ROLES)[number];
+
+export const RESULTS = ["Victory", "Defeat", "Remake"] as const;
+export type Result = (typeof RESULTS)[number];
 export type Rank =
   | "Iron"
   | "Bronze"
