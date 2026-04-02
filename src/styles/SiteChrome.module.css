@@ -1,10 +1,11 @@
-.nav {
+.header {
     position: relative;
     z-index: 2;
     display: flex;
     justify-content: space-between;
     align-items: center;
     padding: 1.5rem 3rem;
+    backdrop-filter: blur(14px);
 }
 
 .logo {
@@ -24,6 +25,12 @@
     background: linear-gradient(140deg, #1d2233, #2e3c63);
     border: 1px solid #3a476f;
     box-shadow: 0 0 0 1px rgba(255, 255, 255, 0.04) inset;
+    transition: transform 180ms ease, box-shadow 180ms ease;
+}
+
+.logo:hover .logoIcon {
+    transform: translateY(-1px) rotate(-3deg);
+    box-shadow: 0 12px 24px rgba(31, 41, 66, 0.35);
 }
 
 .logoText {
@@ -33,9 +40,39 @@
     color: #f4f7ff;
 }
 
+.navActions,
 .navLinks {
     display: flex;
     gap: 0.7rem;
+}
+
+.navLinks {
+    align-items: center;
+}
+
+.navLink {
+    text-decoration: none;
+    color: #d7dffb;
+    font-size: 0.92rem;
+    font-weight: 600;
+    border-radius: 999px;
+    padding: 0.55rem 1rem;
+    transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
+        border-color 0.2s ease;
+    border: 1px solid transparent;
+}
+
+.navLink:hover {
+    transform: translateY(-1px);
+    background: rgba(28, 36, 58, 0.65);
+    box-shadow: 0 10px 22px rgba(12, 18, 31, 0.2);
+}
+
+.navLinkActive {
+    color: #121723;
+    border-color: rgba(140, 200, 255, 0.35);
+    background: linear-gradient(120deg, #8cc8ff, #a6ffd6);
+    box-shadow: 0 6px 16px rgba(59, 131, 188, 0.25);
 }
 
 .btnOutline,
@@ -47,6 +84,7 @@
     padding: 0.55rem 1rem;
     transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease,
         border-color 0.2s ease;
+    will-change: transform;
 }
 
 .btnOutline {
@@ -59,6 +97,7 @@
     border-color: #50649a;
     background: rgba(28, 36, 58, 0.65);
     transform: translateY(-1px);
+    box-shadow: 0 10px 22px rgba(12, 18, 31, 0.28);
 }
 
 .btnPrimary {
@@ -73,6 +112,20 @@
     box-shadow: 0 8px 20px rgba(59, 131, 188, 0.45);
 }
 
+.btnOutline:focus-visible,
+.btnPrimary:focus-visible {
+    outline: 2px solid #8cc8ff;
+    outline-offset: 2px;
+}
+
+.navLinks>* {
+    transition: transform 180ms ease;
+}
+
+.navLinks>*:hover {
+    transform: translateY(-1px);
+}
+
 .footer {
     text-align: center;
     color: #7e8caf;
@@ -84,17 +137,24 @@
 }
 
 @media (max-width: 720px) {
-    .nav {
+    .header {
         padding: 1rem 1rem;
+        gap: 0.75rem;
+        flex-wrap: wrap;
     }
 
     .navLinks {
         gap: 0.45rem;
     }
 
+    .navLink,
     .btnOutline,
     .btnPrimary {
         padding: 0.45rem 0.8rem;
         font-size: 0.82rem;
+    }
+
+    .navActions {
+        flex-wrap: wrap;
     }
 }

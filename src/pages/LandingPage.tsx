@@ -6,7 +6,7 @@ import Footer from "../components/Footer";
 export default function LandingPage() {
   return (
     <div className={styles.page}>
-      <Header />
+      <Header variant="public" />
 
       <section className={styles.hero}>
         <div className={styles.glow} />
@@ -22,7 +22,7 @@ export default function LandingPage() {
         </p>
         <div className={styles.ctaGroup}>
           <Link
-            to="/matches"
+            to="/login"
             className={`${styles.btnLg} ${styles.btnLgPrimary}`}
           >
             Start Analyzing -&gt;

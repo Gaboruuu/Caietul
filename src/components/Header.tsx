@@ -1,21 +1,68 @@
-import { Link } from "react-router-dom";
+import { Link, NavLink } from "react-router-dom";
 import styles from "../styles/SiteChrome.module.css";
 
-export default function Header() {
+type HeaderVariant = "public" | "app";
+
+type HeaderProps = {
+  variant?: HeaderVariant;
+};
+
+export default function Header({ variant = "public" }: HeaderProps) {
+  const logoTo = variant === "app" ? "/matches" : "/";
+
+  if (variant === "app") {
+    return (
+      <header className={styles.header}>
+        <Link to={logoTo} className={styles.logo} aria-label="Caietul home">
+          <div className={styles.logoIcon}>C</div>
+          <span className={styles.logoText}>Caietul</span>
+        </Link>
+
+        <nav className={styles.navLinks} aria-label="App navigation">
+          <NavLink
+            to="/matches"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
+          >
+            Matches
+          </NavLink>
+          <NavLink
+            to="/statistics"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
+          >
+            Statistics
+          </NavLink>
+          <NavLink
+            to="/tilt-meter"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
+          >
+            Tilt Meter
+          </NavLink>
+        </nav>
+      </header>
+    );
+  }
+
   return (
-    <nav className={styles.nav}>
-      <div className={styles.logo}>
+    <header className={styles.header}>
+      <Link to={logoTo} className={styles.logo} aria-label="Caietul home">
         <div className={styles.logoIcon}>C</div>
         <span className={styles.logoText}>Caietul</span>
-      </div>
-      <div className={styles.navLinks}>
-        <a href="#" className={styles.btnOutline}>
+      </Link>
+
+      <div className={styles.navActions}>
+        <Link to="/login" className={styles.btnOutline}>
           Log in
-        </a>
-        <Link to="/matches" className={styles.btnPrimary}>
+        </Link>
+        <Link to="/login" className={styles.btnPrimary}>
           Get Started
         </Link>
       </div>
-    </nav>
+    </header>
   );
 }

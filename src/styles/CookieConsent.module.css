@@ -1,0 +1,152 @@
+/**
+ * Cookie Consent Banner Styles
+ */
+
+.container {
+    position: fixed;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    z-index: 9999;
+    padding: 20px;
+    animation: slideUp 0.3s ease-out;
+}
+
+@keyframes slideUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+.banner {
+    background-color: white;
+    border-radius: 12px;
+    padding: 24px;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.2);
+    max-width: 600px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.content h3 {
+    margin: 0 0 12px 0;
+    font-size: 18px;
+    color: #333;
+    font-weight: 600;
+}
+
+.content p {
+    margin: 0;
+    font-size: 14px;
+    color: #666;
+    line-height: 1.5;
+}
+
+.content p:last-child {
+    margin-top: 8px;
+}
+
+.small {
+    font-size: 12px !important;
+    color: #999 !important;
+    font-style: italic;
+}
+
+.actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+    justify-content: flex-end;
+}
+
+button {
+    padding: 10px 18px;
+    border: none;
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 500;
+    cursor: pointer;
+    transition: all 0.2s ease;
+}
+
+.declineBtn {
+    background-color: #f5f5f5;
+    color: #333;
+    border: 1px solid #e0e0e0;
+}
+
+.declineBtn:hover {
+    background-color: #efefef;
+    border-color: #d0d0d0;
+}
+
+.learnBtn {
+    background-color: #f0f0f0;
+    color: #0066cc;
+    border: 1px solid #d0d0d0;
+}
+
+.learnBtn:hover {
+    background-color: #e8e8e8;
+    border-color: #c0c0c0;
+}
+
+.acceptBtn {
+    background-color: #0066cc;
+    color: white;
+    border: none;
+}
+
+.acceptBtn:hover {
+    background-color: #0052a3;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 8px rgba(0, 102, 204, 0.3);
+}
+
+/* Mobile Responsive */
+@media (max-width: 600px) {
+    .container {
+        padding: 10px;
+    }
+
+    .banner {
+        padding: 16px;
+        gap: 16px;
+        border-radius: 8px;
+    }
+
+    .content h3 {
+        font-size: 16px;
+    }
+
+    .content p {
+        font-size: 13px;
+    }
+
+    .actions {
+        flex-direction: column;
+        justify-content: stretch;
+    }
+
+    button {
+        flex: 1;
+        padding: 12px 16px;
+    }
+
+    .acceptBtn {
+        order: -1;
+        /* Move accept button to top on mobile */
+    }
+}
