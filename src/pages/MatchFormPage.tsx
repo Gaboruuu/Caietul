@@ -149,13 +149,6 @@ export default function MatchFormPage() {
 
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link to="/" className={styles.logo}>
-          <div className={styles.logoIcon}>C</div>
-          <span className={styles.logoText}>Caietul</span>
-        </Link>
-      </nav>
-
       <main className={styles.main}>
         <Link to="/matches" className={styles.back}>
           ← Back to matches

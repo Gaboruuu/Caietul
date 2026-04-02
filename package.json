@@ -15,6 +15,7 @@
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2"

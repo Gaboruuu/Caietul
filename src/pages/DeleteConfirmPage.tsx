@@ -17,12 +17,6 @@ export default function DeleteConfirmPage() {
   if (!match) {
     return (
       <div className={styles.page}>
-        <nav className={styles.nav}>
-          <Link to="/" className={styles.logo}>
-            <div className={styles.logoIcon}>C</div>
-            <span className={styles.logoText}>Caietul</span>
-          </Link>
-        </nav>
         <main style={{ padding: "2rem" }}>
           <p>Match not found</p>
           <Link to="/matches">Back to matches</Link>
@@ -32,13 +26,6 @@ export default function DeleteConfirmPage() {
   }
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link to="/" className={styles.logo}>
-          <div className={styles.logoIcon}>C</div>
-          <span className={styles.logoText}>Caietul</span>
-        </Link>
-      </nav>
-
       <div className={styles.center}>
         <div className={styles.dialog}>
           <div className={styles.dangerIcon}>🗑️</div>

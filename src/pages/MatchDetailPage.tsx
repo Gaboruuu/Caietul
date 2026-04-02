@@ -30,12 +30,6 @@ export default function MatchDetailPage() {
   if (!match) {
     return (
       <div className={styles.page}>
-        <nav className={styles.nav}>
-          <Link to="/" className={styles.logo}>
-            <div className={styles.logoIcon}>C</div>
-            <span className={styles.logoText}>Caietul</span>
-          </Link>
-        </nav>
         <main className={styles.main}>
           <p>Match not found</p>
           <Link to="/matches">Back to matches</Link>
@@ -86,11 +80,7 @@ export default function MatchDetailPage() {
 
   return (
     <div className={styles.page}>
-      <nav className={styles.nav}>
-        <Link to="/" className={styles.logo}>
-          <div className={styles.logoIcon}>C</div>
-          <span className={styles.logoText}>Caietul</span>
-        </Link>
+      <main className={styles.main}>
         <div className={styles.navActions}>
           <Link to="/matches" className={`${styles.btn} ${styles.btnGhost}`}>
             Back
@@ -108,12 +98,6 @@ export default function MatchDetailPage() {
             Delete
           </Link>
         </div>
-      </nav>
-
-      <main className={styles.main}>
-        <Link to="/matches" className={styles.back}>
-          Back to matches
-        </Link>
 
         <div
           className={`${styles.matchHeader} ${

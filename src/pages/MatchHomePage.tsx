@@ -113,20 +113,7 @@ export default function MatchHomePage() {
   );
 
   return (
-    <>
-      <nav className={styles.nav}>
-        <Link to="/" className={styles.logo}>
-          <div className={styles.logoIcon}>C</div>
-          <span className={styles.logoText}>Caietul</span>
-        </Link>
-        <div className={styles.navRight}>
-          <div className={styles.summonerBadge}>
-            ⚔️ ShadowBlade#EUW
-            <span className={styles.rankPill}>Diamond III</span>
-          </div>
-        </div>
-      </nav>
-
+    <div className={styles.page}>
       <main className={styles.main}>
         <div className={styles.layout}>
           <aside className={styles.sidebar}>
@@ -258,7 +245,7 @@ export default function MatchHomePage() {
                       role="link"
                       tabIndex={0}
                     >
-                      <td>
+                      <td data-label="Champion">
                         <div className={styles.champCell}>
                           <div className={styles.champAvatar}>
                             {match.champion.charAt(0).toUpperCase()}
@@ -271,7 +258,7 @@ export default function MatchHomePage() {
                           </div>
                         </div>
                       </td>
-                      <td>
+                      <td data-label="Result">
                         <span
                           className={`${styles.winPill} ${
                             match.result === "Victory"
@@ -282,18 +269,22 @@ export default function MatchHomePage() {
                           {match.result}
                         </span>
                       </td>
-                      <td className={styles.kda}>
+                      <td className={styles.kda} data-label="KDA">
                         {match.kills}
                         <span>/</span>
                         {match.deaths}
                         <span>/</span>
                         {match.assists}
                       </td>
-                      <td>{match.cs}</td>
-                      <td>{formatDuration(match.duration)}</td>
-                      <td>{new Date(match.date).toLocaleDateString()}</td>
-                      <td>{match.visionScore}</td>
-                      <td>
+                      <td data-label="CS">{match.cs}</td>
+                      <td data-label="Duration">
+                        {formatDuration(match.duration)}
+                      </td>
+                      <td data-label="Date">
+                        {new Date(match.date).toLocaleDateString()}
+                      </td>
+                      <td data-label="Vision">{match.visionScore}</td>
+                      <td data-label="Actions">
                         <div
                           className={styles.actions}
                           onClick={(e) => e.stopPropagation()}
@@ -371,6 +362,6 @@ export default function MatchHomePage() {
           </div>
         </div>
       </main>
-    </>
+    </div>
   );
 }
