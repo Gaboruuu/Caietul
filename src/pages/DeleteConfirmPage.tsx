@@ -1,18 +1,68 @@
 import { Link, useParams, useNavigate } from "react-router-dom";
+import { useEffect, useState } from "react";
 import styles from "../styles/DeleteConfirmPage.module.css";
-import { matchStore, formatDuration } from "../store/matchStore";
+import { formatDuration } from "../store/matchStore";
+import { deleteMatch, fetchMatchById } from "../api/matchesApi";
+import type { Match } from "../types/match";
 
 export default function DeleteConfirmPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
-  const match = matchStore.getById(id || "");
+  const [match, setMatch] = useState<Match | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const handleDelete = () => {
+  useEffect(() => {
+    let active = true;
+
+    const loadMatch = async () => {
+      if (!id) {
+        if (active) {
+          setMatch(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const loadedMatch = await fetchMatchById(id);
+        if (active) {
+          setMatch(loadedMatch);
+        }
+      } catch {
+        if (active) {
+          setMatch(null);
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadMatch();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  const handleDelete = async () => {
     if (match) {
-      matchStore.delete(match.id);
+      await deleteMatch(match.id);
       navigate("/matches");
     }
   };
+
+  if (isLoading) {
+    return (
+      <div className={styles.page}>
+        <main style={{ padding: "2rem" }}>
+          <p>Loading match...</p>
+        </main>
+      </div>
+    );
+  }
 
   if (!match) {
     return (

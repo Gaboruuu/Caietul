@@ -144,10 +144,19 @@ export function useActivityLog(): ActivityLog {
  */
 export function usePreference<T = unknown>(
   key: string,
+): [T | undefined, (value: T) => void];
+export function usePreference<T = unknown>(
+  key: string,
+  defaultValue: T,
+): [T, (value: T) => void];
+export function usePreference<T = unknown>(
+  key: string,
   defaultValue?: T,
-): [T, (value: T) => void] {
-  const [value, setValue] = useState<T>(() =>
-    getPreference<T>(key, defaultValue),
+): [T | undefined, (value: T) => void] {
+  const [value, setValue] = useState<T | undefined>(() =>
+    defaultValue === undefined
+      ? getPreference<T>(key)
+      : getPreference<T>(key, defaultValue),
   );
 
   const updateValue = useCallback(
@@ -213,10 +222,12 @@ export function useFormTracking(
  */
 export function useScrollTracking(threshold: number = 50): void {
   useEffect(() => {
-    let scrollTimeout: NodeJS.Timeout;
+    let scrollTimeout: ReturnType<typeof setTimeout> | undefined;
 
     const handleScroll = () => {
-      clearTimeout(scrollTimeout);
+      if (scrollTimeout !== undefined) {
+        clearTimeout(scrollTimeout);
+      }
       scrollTimeout = setTimeout(() => {
         const scrollPercentage = Math.round(
           (window.scrollY /
@@ -236,7 +247,9 @@ export function useScrollTracking(threshold: number = 50): void {
     window.addEventListener("scroll", handleScroll);
 
     return () => {
-      clearTimeout(scrollTimeout);
+      if (scrollTimeout !== undefined) {
+        clearTimeout(scrollTimeout);
+      }
       window.removeEventListener("scroll", handleScroll);
     };
   }, [threshold]);

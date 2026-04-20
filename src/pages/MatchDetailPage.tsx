@@ -1,6 +1,9 @@
 import { Link, useParams } from "react-router-dom";
+import { useEffect, useState } from "react";
 import styles from "../styles/MatchDetailPage.module.css";
-import { calculateKda, formatDuration, matchStore } from "../store/matchStore";
+import { calculateKda, formatDuration } from "../store/matchStore";
+import { fetchMatchById } from "../api/matchesApi";
+import type { Match } from "../types/match";
 
 const clampToPercent = (value: number, max: number): string => {
   if (max <= 0) {
@@ -25,7 +28,55 @@ const getResultTone = (result: string): string => {
 
 export default function MatchDetailPage() {
   const { id } = useParams<{ id: string }>();
-  const match = matchStore.getById(id || "");
+  const [match, setMatch] = useState<Match | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadMatch = async () => {
+      if (!id) {
+        if (active) {
+          setMatch(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+
+      try {
+        const loadedMatch = await fetchMatchById(id);
+        if (active) {
+          setMatch(loadedMatch);
+        }
+      } catch {
+        if (active) {
+          setMatch(null);
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadMatch();
+
+    return () => {
+      active = false;
+    };
+  }, [id]);
+
+  if (isLoading) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <p>Loading match...</p>
+        </main>
+      </div>
+    );
+  }
 
   if (!match) {
     return (
@@ -66,7 +117,7 @@ export default function MatchDetailPage() {
   const tips = [
     {
       dot: styles.dotGreen,
-      text: `${match.result} on ${match.champion} ${match.role} is recorded cleanly and ready for later backend sync.`,
+      text: `${match.result} on ${match.champion} ${match.role} was loaded from the backend API.`,
     },
     {
       dot: styles.dotYellow,

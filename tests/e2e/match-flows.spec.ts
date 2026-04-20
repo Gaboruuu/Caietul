@@ -1,6 +1,17 @@
 import { expect, test, type Page } from "@playwright/test";
 
+const analyticsConsentCookie = encodeURIComponent(
+  JSON.stringify({ enableAnalytics: true }),
+);
+
+async function seedConsent(page: Page) {
+  await page.context().addInitScript((cookieValue) => {
+    document.cookie = `user_preferences=${cookieValue}; path=/`;
+  }, analyticsConsentCookie);
+}
+
 async function createMatch(page: Page, champion: string) {
+  await seedConsent(page);
   await page.goto("/matches/new");
 
   await page.getByLabel("Champion").fill(champion);
@@ -25,9 +36,15 @@ test.describe("Critical match management journeys", () => {
   test("navigates landing -> home -> detail for an existing match", async ({
     page,
   }) => {
+    await seedConsent(page);
     await page.goto("/");
 
     await page.getByRole("link", { name: /Start Analyzing/i }).click();
+    await expect(page).toHaveURL(/\/login$/);
+
+    await page
+      .getByRole("button", { name: /Continue with Riot Account/i })
+      .click();
     await expect(page).toHaveURL(/\/matches$/);
     await expect(
       page.getByRole("heading", { name: "Match History" }),
@@ -37,13 +54,16 @@ test.describe("Critical match management journeys", () => {
     await firstRow.getByRole("link", { name: "View" }).click();
 
     await expect(page).toHaveURL(/\/matches\/[^/]+$/);
-    await expect(page.getByText("Full Scoreboard")).toBeVisible();
+    await expect(
+      page.getByRole("heading", { name: "Performance" }),
+    ).toBeVisible();
     await expect(page.getByText("Champion:")).toBeVisible();
   });
 
   test("shows validation errors and allows creating a new match", async ({
     page,
   }) => {
+    await seedConsent(page);
     await page.goto("/matches/new");
 
     await page.getByRole("button", { name: "Add Match" }).click();
@@ -64,6 +84,7 @@ test.describe("Critical match management journeys", () => {
   test("edits an existing match and reflects updated values", async ({
     page,
   }) => {
+    await seedConsent(page);
     const champion = `E2E Edit ${Date.now()}`;
     const editedChampion = `E2E Updated ${Date.now()}`;
 
@@ -90,6 +111,7 @@ test.describe("Critical match management journeys", () => {
   });
 
   test("deletes a match from the confirmation page", async ({ page }) => {
+    await seedConsent(page);
     const champion = `E2E Delete ${Date.now()}`;
 
     await createMatch(page, champion);

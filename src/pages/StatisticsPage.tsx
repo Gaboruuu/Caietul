@@ -1,7 +1,8 @@
 import { faker } from "@faker-js/faker";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import styles from "../styles/StatisticsPage.module.css";
-import { calculateKda, formatDuration, matchStore } from "../store/matchStore";
+import { calculateKda, formatDuration } from "../store/matchStore";
+import { createMatch, deleteMatch, fetchAllMatches } from "../api/matchesApi";
 import type { Match, Result, Role } from "../types/match";
 
 type SortKey = "result" | "kda" | "cs" | "vision" | "score";
@@ -103,22 +104,25 @@ export default function StatisticsPage() {
   const [sortKey, setSortKey] = useState<SortKey>("score");
   const [currentPage, setCurrentPage] = useState(1);
   const [isChartUpdating, setIsChartUpdating] = useState(false);
-  const [allMatches, setAllMatches] = useState<Match[]>(() =>
-    matchStore.getAll().slice(0, 25),
-  );
+  const [allMatches, setAllMatches] = useState<Match[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
   const generatorRef = useRef<number | null>(null);
   const fakerIdsRef = useRef<Set<string>>(new Set());
   const hasMountedRef = useRef(false);
 
-  const refreshMatches = useCallback(() => {
-    setAllMatches(matchStore.getAll().slice(0, 25));
+  const refreshMatches = useCallback(async () => {
+    const matches = await fetchAllMatches();
+    setAllMatches(matches.slice(0, 25));
   }, []);
 
-  const addFakerMatch = useCallback(() => {
-    const created = matchStore.add(createFakeMatch());
+  useEffect(() => {
+    void refreshMatches();
+  }, [refreshMatches]);
+
+  const addFakerMatch = useCallback(async () => {
+    const created = await createMatch(createFakeMatch());
     fakerIdsRef.current.add(created.id);
-    refreshMatches();
+    await refreshMatches();
   }, [refreshMatches]);
 
   const clearGenerator = useCallback(() => {
@@ -132,15 +136,17 @@ export default function StatisticsPage() {
     setIsGenerating((value) => !value);
   };
 
-  const handleDeleteFakerData = () => {
+  const handleDeleteFakerData = async () => {
     setIsGenerating(false);
 
-    fakerIdsRef.current.forEach((id) => {
-      matchStore.delete(id);
-    });
+    await Promise.all(
+      Array.from(fakerIdsRef.current).map(async (matchId) => {
+        await deleteMatch(matchId);
+      }),
+    );
 
     fakerIdsRef.current.clear();
-    refreshMatches();
+    await refreshMatches();
   };
 
   useEffect(() => {
@@ -149,9 +155,9 @@ export default function StatisticsPage() {
       return;
     }
 
-    addFakerMatch();
+    void addFakerMatch();
     generatorRef.current = window.setInterval(() => {
-      addFakerMatch();
+      void addFakerMatch();
     }, 1200);
 
     return clearGenerator;

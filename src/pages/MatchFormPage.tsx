@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import styles from "../styles/MatchFormPage.module.css";
 import {
-  matchStore,
   validateMatch,
   isValid,
   type ValidationErrors,
 } from "../store/matchStore";
+import {
+  ApiValidationError,
+  createMatch,
+  fetchMatchById,
+  updateMatch,
+} from "../api/matchesApi";
 import {
   ROLES,
   RESULTS,
@@ -89,9 +94,52 @@ export default function MatchFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
-  const match = isEditing ? (matchStore.getById(id!) ?? null) : null;
+  const [existingMatch, setExistingMatch] = useState<Match | null>(null);
+  const [isLoading, setIsLoading] = useState(isEditing);
+  const [submitError, setSubmitError] = useState<string | null>(null);
 
-  const initialValues = useMemo(() => getInitialFormValues(match), [match]);
+  useEffect(() => {
+    let active = true;
+
+    const loadMatch = async () => {
+      if (!isEditing || !id) {
+        if (active) {
+          setExistingMatch(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+      setSubmitError(null);
+
+      try {
+        const loadedMatch = await fetchMatchById(id);
+        if (active) {
+          setExistingMatch(loadedMatch);
+        }
+      } catch {
+        if (active) {
+          setExistingMatch(null);
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadMatch();
+
+    return () => {
+      active = false;
+    };
+  }, [id, isEditing]);
+
+  const initialValues = useMemo(
+    () => getInitialFormValues(existingMatch),
+    [existingMatch],
+  );
   const [form, setForm] = useState<MatchFormValues>(initialValues);
   const [errors, setErrors] = useState<ValidationErrors>({});
 
@@ -109,7 +157,7 @@ export default function MatchFormPage() {
   const inputClass = (hasError: boolean) =>
     `${styles.input} ${hasError ? styles.inputError : ""}`;
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
 
     const totalSeconds =
@@ -138,14 +186,53 @@ export default function MatchFormPage() {
     }
 
     setErrors({});
-    if (isEditing && match) {
-      matchStore.update(match.id, matchData);
-    } else {
-      matchStore.add(matchData);
-    }
+    setSubmitError(null);
 
-    navigate("/matches");
+    try {
+      if (isEditing && existingMatch) {
+        await updateMatch(existingMatch.id, matchData);
+      } else {
+        await createMatch(matchData);
+      }
+
+      navigate("/matches");
+    } catch (err) {
+      if (err instanceof ApiValidationError) {
+        setErrors((prev) => ({
+          ...prev,
+          ...(err.details as ValidationErrors),
+        }));
+        return;
+      }
+
+      setSubmitError(
+        err instanceof Error ? err.message : "Failed to save match.",
+      );
+    }
   };
+
+  if (isLoading) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <p>Loading match...</p>
+        </main>
+      </div>
+    );
+  }
+
+  if (isEditing && !existingMatch) {
+    return (
+      <div className={styles.page}>
+        <main className={styles.main}>
+          <p>Match not found</p>
+          <Link to="/matches" className={styles.back}>
+            Back to matches
+          </Link>
+        </main>
+      </div>
+    );
+  }
 
   return (
     <div className={styles.page}>
@@ -160,6 +247,8 @@ export default function MatchFormPage() {
             ? "Update the details for this match entry."
             : "Record a new match and track your performance."}
         </p>
+
+        {submitError && <p className={styles.errorText}>{submitError}</p>}
 
         <form onSubmit={handleSubmit}>
           <div className={styles.card}>

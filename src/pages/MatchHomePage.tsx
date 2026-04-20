@@ -1,7 +1,8 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import styles from "../styles/MatchHomePage.module.css";
-import { matchStore, formatDuration } from "../store/matchStore";
+import { formatDuration } from "../store/matchStore";
+import { fetchMatchesPage, type PaginatedMatches } from "../api/matchesApi";
 import RankBlock from "../components/matchHome/RankBlock";
 import ChampMiniRow from "../components/matchHome/ChampMiniRow";
 import MasteryRow from "../components/matchHome/MasteryRow";
@@ -106,11 +107,49 @@ const CHAMPION_MASTERY = [
 export default function MatchHomePage() {
   const navigate = useNavigate();
   const [currentPage, setCurrentPage] = useState(1);
+  const [pageData, setPageData] = useState<PaginatedMatches>({
+    page: 1,
+    pageSize: PAGE_SIZE,
+    total: 0,
+    totalPages: 0,
+    items: [],
+  });
+  const [isLoading, setIsLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
 
-  const pageData = useMemo(
-    () => matchStore.getPage(currentPage, PAGE_SIZE),
-    [currentPage],
-  );
+  useEffect(() => {
+    let active = true;
+
+    const loadMatches = async () => {
+      setIsLoading(true);
+      setError(null);
+
+      try {
+        const data = await fetchMatchesPage(currentPage, PAGE_SIZE);
+        if (active) {
+          setPageData(data);
+        }
+      } catch (err) {
+        if (active) {
+          setError(
+            err instanceof Error ? err.message : "Failed to load matches.",
+          );
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadMatches();
+
+    return () => {
+      active = false;
+    };
+  }, [currentPage]);
+
+  const safeTotalPages = Math.max(1, pageData.totalPages);
 
   return (
     <div className={styles.page}>
@@ -232,6 +271,21 @@ export default function MatchHomePage() {
                   </tr>
                 </thead>
                 <tbody>
+                  {isLoading && (
+                    <tr>
+                      <td colSpan={8}>Loading matches...</td>
+                    </tr>
+                  )}
+                  {!isLoading && error && (
+                    <tr>
+                      <td colSpan={8}>Failed to load matches: {error}</td>
+                    </tr>
+                  )}
+                  {!isLoading && !error && pageData.items.length === 0 && (
+                    <tr>
+                      <td colSpan={8}>No matches found.</td>
+                    </tr>
+                  )}
                   {pageData.items.map((match) => (
                     <tr
                       key={match.id}
@@ -329,10 +383,10 @@ export default function MatchHomePage() {
                   >
                     ←
                   </button>
-                  {Array.from({ length: pageData.totalPages }, (_, i) => i + 1)
+                  {Array.from({ length: safeTotalPages }, (_, i) => i + 1)
                     .slice(
                       Math.max(0, currentPage - 2),
-                      Math.min(pageData.totalPages, currentPage + 2),
+                      Math.min(safeTotalPages, currentPage + 2),
                     )
                     .map((page) => (
                       <button
@@ -348,11 +402,9 @@ export default function MatchHomePage() {
                   <button
                     className={styles.pageBtn}
                     onClick={() =>
-                      setCurrentPage(
-                        Math.min(pageData.totalPages, currentPage + 1),
-                      )
+                      setCurrentPage(Math.min(safeTotalPages, currentPage + 1))
                     }
-                    disabled={currentPage === pageData.totalPages}
+                    disabled={currentPage === safeTotalPages}
                   >
                     →
                   </button>

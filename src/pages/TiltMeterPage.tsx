@@ -1,7 +1,8 @@
-import { useMemo } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { Link } from "react-router-dom";
 import styles from "../styles/TiltMeterPage.module.css";
-import { matchStore, calculateKda } from "../store/matchStore";
+import { calculateKda } from "../store/matchStore";
+import { fetchAllMatches } from "../api/matchesApi";
 import type { Match } from "../types/match";
 
 const CHAMPION_ICONS: Record<string, string> = {
@@ -32,7 +33,30 @@ const getTiltColor = (level: "high" | "medium" | "low"): string => {
 };
 
 export default function TiltMeterPage() {
-  const matches = useMemo(() => matchStore.getAll(), []);
+  const [matches, setMatches] = useState<Match[]>([]);
+
+  useEffect(() => {
+    let active = true;
+
+    const loadMatches = async () => {
+      try {
+        const items = await fetchAllMatches();
+        if (active) {
+          setMatches(items);
+        }
+      } catch {
+        if (active) {
+          setMatches([]);
+        }
+      }
+    };
+
+    void loadMatches();
+
+    return () => {
+      active = false;
+    };
+  }, []);
 
   const stats = useMemo(() => {
     const victories = matches.filter((m) => m.result === "Victory").length;

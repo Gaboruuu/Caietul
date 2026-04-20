@@ -52,7 +52,12 @@ export function getPreferences(): UserPreferences {
 /**
  * Get a specific preference
  */
-export function getPreference<T = unknown>(key: string, defaultValue?: T): T {
+export function getPreference<T = unknown>(key: string): T | undefined;
+export function getPreference<T = unknown>(key: string, defaultValue: T): T;
+export function getPreference<T = unknown>(
+  key: string,
+  defaultValue?: T,
+): T | undefined {
   const preferences = getPreferences();
   return (preferences[key] as T) ?? defaultValue;
 }

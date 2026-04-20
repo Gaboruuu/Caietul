@@ -1,7 +1,8 @@
-import { useMemo, useState } from "react";
+import { useEffect, useState } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import styles from "../styles/TiltMeterMatchPage.module.css";
-import { matchStore } from "../store/matchStore";
+import { fetchMatchById } from "../api/matchesApi";
+import type { Match } from "../types/match";
 
 const CHAMPION_ICONS: Record<string, string> = {
   yasuo: "⚔️",
@@ -54,6 +55,8 @@ interface ModalState {
 export default function TiltMeterMatchPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const [match, setMatch] = useState<Match | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
   const [selectedRageIdx, setSelectedRageIdx] = useState(0);
   const [modal, setModal] = useState<ModalState>({
     open: false,
@@ -63,10 +66,49 @@ export default function TiltMeterMatchPage() {
     shame: 8,
   });
 
-  const match = useMemo(() => {
-    const allMatches = matchStore.getAll();
-    return allMatches.find((m) => m.id.toString() === (id || "0"));
+  useEffect(() => {
+    let active = true;
+
+    const loadMatch = async () => {
+      if (!id) {
+        if (active) {
+          setMatch(null);
+          setIsLoading(false);
+        }
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const loadedMatch = await fetchMatchById(id);
+        if (active) {
+          setMatch(loadedMatch);
+        }
+      } catch {
+        if (active) {
+          setMatch(null);
+        }
+      } finally {
+        if (active) {
+          setIsLoading(false);
+        }
+      }
+    };
+
+    void loadMatch();
+
+    return () => {
+      active = false;
+    };
   }, [id]);
+
+  if (isLoading) {
+    return (
+      <div style={{ padding: "40px", textAlign: "center", color: "#fff" }}>
+        <p>Loading match...</p>
+      </div>
+    );
+  }
 
   if (!match) {
     return (
