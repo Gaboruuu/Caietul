@@ -8,7 +8,7 @@ import {
 const sendValidationError = (response, errors) =>
   response.status(400).json({ error: "Validation failed", details: errors });
 
-export const createMatchesRouter = (store) => {
+export const createMatchesRouter = (store, dataGenerationManager = null) => {
   const router = Router();
 
   router.get("/", (request, response) => {
@@ -68,6 +68,39 @@ export const createMatchesRouter = (store) => {
 
     return response.status(204).send();
   });
+
+  // Data generation endpoints
+  if (dataGenerationManager) {
+    router.post("/generation/start", (request, response) => {
+      const { batchSize = 5, intervalMs = 3000 } = request.body;
+
+      const result = dataGenerationManager.startGeneration(store, {
+        batchSize: Number(batchSize),
+        intervalMs: Number(intervalMs),
+      });
+
+      if (result.success) {
+        return response.status(200).json(result);
+      } else {
+        return response.status(400).json(result);
+      }
+    });
+
+    router.post("/generation/stop", (request, response) => {
+      const result = dataGenerationManager.stopGeneration();
+
+      if (result.success) {
+        return response.status(200).json(result);
+      } else {
+        return response.status(400).json(result);
+      }
+    });
+
+    router.get("/generation/status", (request, response) => {
+      const status = dataGenerationManager.getStatus();
+      return response.json(status);
+    });
+  }
 
   return router;
 };

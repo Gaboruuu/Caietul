@@ -1,5 +1,5 @@
 import request from "supertest";
-import { beforeEach, describe, expect, it } from "vitest";
+import { afterEach, beforeEach, describe, expect, it } from "vitest";
 import { createApp } from "./app.js";
 import { createMatchStore } from "./store/matchStore.js";
 import { loadSeedMatches } from "./data/seedMatches.js";
@@ -23,9 +23,21 @@ const buildMatch = (overrides = {}) => ({
 let app;
 let store;
 
+const runGraphQL = async ({ query, variables }) => {
+  const response = await request(app)
+    .post("/graphql")
+    .send({ query, variables });
+  expect(response.status).toBe(200);
+  return response.body;
+};
+
 beforeEach(() => {
   store = createMatchStore(loadSeedMatches());
   app = createApp({ store });
+});
+
+afterEach(() => {
+  app.dataGenerationManager.stopGeneration();
 });
 
 describe("GET /api/health", () => {
@@ -36,86 +48,235 @@ describe("GET /api/health", () => {
   });
 });
 
-describe("GET /api/matches", () => {
+describe("GraphQL query: matches", () => {
   it("returns a paginated list", async () => {
-    const response = await request(app).get("/api/matches?page=1&pageSize=5");
-    expect(response.status).toBe(200);
-    expect(response.body.items).toHaveLength(5);
-    expect(response.body.page).toBe(1);
-    expect(response.body.pageSize).toBe(5);
-    expect(response.body.total).toBeGreaterThan(5);
+    const body = await runGraphQL({
+      query: `
+        query Matches($page: Int, $pageSize: Int) {
+          matches(page: $page, pageSize: $pageSize) {
+            page
+            pageSize
+            total
+            items { id champion }
+          }
+        }
+      `,
+      variables: { page: 1, pageSize: 5 },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.matches.items).toHaveLength(5);
+    expect(body.data.matches.page).toBe(1);
+    expect(body.data.matches.pageSize).toBe(5);
+    expect(body.data.matches.total).toBeGreaterThan(5);
   });
 
   it("rejects invalid pagination params", async () => {
-    const response = await request(app).get("/api/matches?page=0&pageSize=101");
-    expect(response.status).toBe(400);
-    expect(response.body.error).toBe("Validation failed");
-    expect(response.body.details.page).toBeDefined();
-    expect(response.body.details.pageSize).toBeDefined();
+    const body = await runGraphQL({
+      query: `
+        query Matches($page: Int, $pageSize: Int) {
+          matches(page: $page, pageSize: $pageSize) {
+            page
+          }
+        }
+      `,
+      variables: { page: 0, pageSize: 101 },
+    });
+
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].message).toBe("Validation failed");
+    expect(body.errors[0].extensions.code).toBe("BAD_USER_INPUT");
+    expect(body.errors[0].extensions.details.page).toBeDefined();
+    expect(body.errors[0].extensions.details.pageSize).toBeDefined();
   });
 });
 
-describe("GET /api/matches/:id", () => {
+describe("GraphQL query: match", () => {
   it("returns a single match", async () => {
     const existing = store.list()[0];
-    const response = await request(app).get(`/api/matches/${existing.id}`);
-    expect(response.status).toBe(200);
-    expect(response.body.id).toBe(existing.id);
+    const body = await runGraphQL({
+      query: `
+        query Match($id: ID!) {
+          match(id: $id) {
+            id
+          }
+        }
+      `,
+      variables: { id: existing.id },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.match.id).toBe(existing.id);
   });
 
-  it("returns 404 for an unknown match", async () => {
-    const response = await request(app).get("/api/matches/missing");
-    expect(response.status).toBe(404);
+  it("returns null for an unknown match", async () => {
+    const body = await runGraphQL({
+      query: `
+        query Match($id: ID!) {
+          match(id: $id) {
+            id
+          }
+        }
+      `,
+      variables: { id: "missing" },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.match).toBeNull();
   });
 });
 
-describe("POST /api/matches", () => {
+describe("GraphQL mutation: createMatch", () => {
   it("creates a match", async () => {
-    const response = await request(app).post("/api/matches").send(buildMatch());
-    expect(response.status).toBe(201);
-    expect(response.body.id).toMatch(/^match-/);
-    expect(store.getById(response.body.id)).toBeDefined();
+    const body = await runGraphQL({
+      query: `
+        mutation CreateMatch($input: MatchInput!) {
+          createMatch(input: $input) {
+            id
+          }
+        }
+      `,
+      variables: { input: buildMatch() },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.createMatch.id).toMatch(/^match-/);
+    expect(store.getById(body.data.createMatch.id)).toBeDefined();
   });
 
   it("rejects invalid data", async () => {
-    const response = await request(app)
-      .post("/api/matches")
-      .send(buildMatch({ kills: -1 }));
-    expect(response.status).toBe(400);
-    expect(response.body.details.kills).toBeDefined();
+    const body = await runGraphQL({
+      query: `
+        mutation CreateMatch($input: MatchInput!) {
+          createMatch(input: $input) {
+            id
+          }
+        }
+      `,
+      variables: { input: buildMatch({ kills: -1 }) },
+    });
+
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].extensions.details.kills).toBeDefined();
   });
 });
 
-describe("PUT /api/matches/:id", () => {
+describe("GraphQL mutation: updateMatch", () => {
   it("updates an existing match", async () => {
     const existing = store.list()[0];
-    const response = await request(app)
-      .put(`/api/matches/${existing.id}`)
-      .send(buildMatch({ kills: 17 }));
+    const body = await runGraphQL({
+      query: `
+        mutation UpdateMatch($id: ID!, $input: MatchInput!) {
+          updateMatch(id: $id, input: $input) {
+            kills
+          }
+        }
+      `,
+      variables: { id: existing.id, input: buildMatch({ kills: 17 }) },
+    });
 
-    expect(response.status).toBe(200);
-    expect(response.body.kills).toBe(17);
+    expect(body.errors).toBeUndefined();
+    expect(body.data.updateMatch.kills).toBe(17);
     expect(store.getById(existing.id)?.kills).toBe(17);
   });
 
-  it("returns 404 for an unknown match", async () => {
-    const response = await request(app)
-      .put("/api/matches/missing")
-      .send(buildMatch());
-    expect(response.status).toBe(404);
+  it("returns not found for an unknown match", async () => {
+    const body = await runGraphQL({
+      query: `
+        mutation UpdateMatch($id: ID!, $input: MatchInput!) {
+          updateMatch(id: $id, input: $input) {
+            id
+          }
+        }
+      `,
+      variables: { id: "missing", input: buildMatch() },
+    });
+
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].message).toBe("Match not found");
+    expect(body.errors[0].extensions.code).toBe("NOT_FOUND");
   });
 });
 
-describe("DELETE /api/matches/:id", () => {
+describe("GraphQL mutation: deleteMatch", () => {
   it("removes a match", async () => {
     const created = store.create(buildMatch());
-    const response = await request(app).delete(`/api/matches/${created.id}`);
-    expect(response.status).toBe(204);
+    const body = await runGraphQL({
+      query: `
+        mutation DeleteMatch($id: ID!) {
+          deleteMatch(id: $id) {
+            success
+          }
+        }
+      `,
+      variables: { id: created.id },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.deleteMatch.success).toBe(true);
     expect(store.getById(created.id)).toBeUndefined();
   });
 
-  it("returns 404 for an unknown match", async () => {
-    const response = await request(app).delete("/api/matches/missing");
-    expect(response.status).toBe(404);
+  it("returns not found for an unknown match", async () => {
+    const body = await runGraphQL({
+      query: `
+        mutation DeleteMatch($id: ID!) {
+          deleteMatch(id: $id) {
+            success
+          }
+        }
+      `,
+      variables: { id: "missing" },
+    });
+
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].extensions.code).toBe("NOT_FOUND");
+  });
+});
+
+describe("GraphQL generation controls", () => {
+  it("starts, reports and stops generation", async () => {
+    const startBody = await runGraphQL({
+      query: `
+        mutation StartGeneration($batchSize: Int!, $intervalMs: Int!) {
+          startGeneration(batchSize: $batchSize, intervalMs: $intervalMs) {
+            success
+            message
+            config { batchSize intervalMs }
+          }
+        }
+      `,
+      variables: { batchSize: 2, intervalMs: 10_000 },
+    });
+
+    expect(startBody.errors).toBeUndefined();
+    expect(startBody.data.startGeneration.success).toBe(true);
+    expect(startBody.data.startGeneration.config.batchSize).toBe(2);
+
+    const statusBody = await runGraphQL({
+      query: `
+        query {
+          generationStatus {
+            isGenerating
+          }
+        }
+      `,
+    });
+
+    expect(statusBody.errors).toBeUndefined();
+    expect(statusBody.data.generationStatus.isGenerating).toBe(true);
+
+    const stopBody = await runGraphQL({
+      query: `
+        mutation {
+          stopGeneration {
+            success
+          }
+        }
+      `,
+    });
+
+    expect(stopBody.errors).toBeUndefined();
+    expect(stopBody.data.stopGeneration.success).toBe(true);
   });
 });
