@@ -3,7 +3,7 @@ import {
   isNetworkOnline,
   checkServerConnectivity,
 } from "../utils/networkConnectivity";
-import { queueOperation, type SyncOperation } from "../utils/syncQueue";
+import { queueOperation } from "../utils/syncQueue";
 
 export type PaginatedMatches = {
   page: number;
@@ -16,6 +16,18 @@ export type PaginatedMatches = {
 type ApiErrorPayload = {
   error?: string;
   details?: Record<string, string>;
+};
+
+type GraphQLErrorPayload = {
+  message?: string;
+  extensions?: {
+    details?: Record<string, string>;
+  };
+};
+
+type GraphQLResponse<T> = {
+  data?: T;
+  errors?: GraphQLErrorPayload[];
 };
 
 export class ApiValidationError extends Error {
@@ -51,36 +63,10 @@ const parseJson = async <T>(response: Response): Promise<T | null> => {
   return JSON.parse(text) as T;
 };
 
-const request = async <T>(
-  path: string,
-  init?: RequestInit,
-): Promise<T | null> => {
+const runWithOfflineHandling = async <T>(operation: () => Promise<T>) => {
   try {
-    const response = await fetch(`/api${path}`, {
-      headers: {
-        "Content-Type": "application/json",
-        ...(init?.headers ?? {}),
-      },
-      ...init,
-    });
-
-    const payload = await parseJson<ApiErrorPayload | T>(response);
-
-    if (!response.ok) {
-      const apiPayload = payload as ApiErrorPayload | null;
-      const message =
-        apiPayload?.error ?? `Request failed with ${response.status}`;
-
-      if (response.status === 400 && apiPayload?.details) {
-        throw new ApiValidationError(message, apiPayload.details);
-      }
-
-      throw new Error(message);
-    }
-
-    return payload as T | null;
+    return await operation();
   } catch (error) {
-    // Check if this is a network/connectivity error
     const isNetworkError =
       error instanceof TypeError ||
       (error instanceof Error &&
@@ -100,19 +86,85 @@ const request = async <T>(
       }
     }
 
-    // Re-throw the original error if it's not a network error
     throw error;
   }
+};
+
+const graphqlRequest = async <T>(
+  query: string,
+  variables?: Record<string, unknown>,
+): Promise<T> => {
+  const response = await fetch("/graphql", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ query, variables }),
+  });
+
+  const payload = (await parseJson<GraphQLResponse<T>>(response)) ?? {};
+
+  if (!response.ok) {
+    const apiPayload = payload as unknown as ApiErrorPayload;
+    throw new Error(
+      apiPayload?.error ?? `Request failed with ${response.status}`,
+    );
+  }
+
+  if (payload.errors && payload.errors.length > 0) {
+    const firstError = payload.errors[0];
+    const message = firstError.message ?? "GraphQL request failed";
+
+    if (firstError.extensions?.details) {
+      throw new ApiValidationError(message, firstError.extensions.details);
+    }
+
+    throw new Error(message);
+  }
+
+  if (!payload.data) {
+    throw new Error("GraphQL response did not include data");
+  }
+
+  return payload.data;
 };
 
 export const fetchMatchesPage = async (
   page: number,
   pageSize: number,
 ): Promise<PaginatedMatches> => {
-  const data = await request<PaginatedMatches>(
-    `/matches?page=${page}&pageSize=${pageSize}`,
+  const data = await runWithOfflineHandling(() =>
+    graphqlRequest<{ matches: PaginatedMatches }>(
+      `
+        query Matches($page: Int, $pageSize: Int) {
+          matches(page: $page, pageSize: $pageSize) {
+            page
+            pageSize
+            total
+            totalPages
+            items {
+              id
+              champion
+              role
+              result
+              kills
+              deaths
+              assists
+              cs
+              visionScore
+              duration
+              date
+              patch
+              notes
+            }
+          }
+        }
+      `,
+      { page, pageSize },
+    ),
   );
-  return data as PaginatedMatches;
+
+  return data.matches;
 };
 
 export const fetchAllMatches = async (): Promise<Match[]> => {
@@ -121,17 +173,66 @@ export const fetchAllMatches = async (): Promise<Match[]> => {
 };
 
 export const fetchMatchById = async (id: string): Promise<Match> => {
-  const data = await request<Match>(`/matches/${id}`);
-  return data as Match;
+  const data = await runWithOfflineHandling(() =>
+    graphqlRequest<{ match: Match | null }>(
+      `
+        query Match($id: ID!) {
+          match(id: $id) {
+            id
+            champion
+            role
+            result
+            kills
+            deaths
+            assists
+            cs
+            visionScore
+            duration
+            date
+            patch
+            notes
+          }
+        }
+      `,
+      { id },
+    ),
+  );
+
+  if (!data.match) {
+    throw new Error("Match not found");
+  }
+
+  return data.match;
 };
 
 export const createMatch = async (match: Omit<Match, "id">): Promise<Match> => {
   try {
-    const data = await request<Match>("/matches", {
-      method: "POST",
-      body: JSON.stringify(match),
-    });
-    return data as Match;
+    const data = await runWithOfflineHandling(() =>
+      graphqlRequest<{ createMatch: Match }>(
+        `
+          mutation CreateMatch($input: MatchInput!) {
+            createMatch(input: $input) {
+              id
+              champion
+              role
+              result
+              kills
+              deaths
+              assists
+              cs
+              visionScore
+              duration
+              date
+              patch
+              notes
+            }
+          }
+        `,
+        { input: match },
+      ),
+    );
+
+    return data.createMatch;
   } catch (error) {
     if (error instanceof OfflineError) {
       // Generate a temporary ID for offline-created matches
@@ -159,11 +260,32 @@ export const updateMatch = async (
   match: Omit<Match, "id">,
 ): Promise<Match> => {
   try {
-    const data = await request<Match>(`/matches/${id}`, {
-      method: "PUT",
-      body: JSON.stringify(match),
-    });
-    return data as Match;
+    const data = await runWithOfflineHandling(() =>
+      graphqlRequest<{ updateMatch: Match }>(
+        `
+          mutation UpdateMatch($id: ID!, $input: MatchInput!) {
+            updateMatch(id: $id, input: $input) {
+              id
+              champion
+              role
+              result
+              kills
+              deaths
+              assists
+              cs
+              visionScore
+              duration
+              date
+              patch
+              notes
+            }
+          }
+        `,
+        { id, input: match },
+      ),
+    );
+
+    return data.updateMatch;
   } catch (error) {
     if (error instanceof OfflineError) {
       // Queue the operation
@@ -185,9 +307,22 @@ export const updateMatch = async (
 
 export const deleteMatch = async (id: string): Promise<void> => {
   try {
-    await request(`/matches/${id}`, {
-      method: "DELETE",
-    });
+    const data = await runWithOfflineHandling(() =>
+      graphqlRequest<{ deleteMatch: { success: boolean } }>(
+        `
+          mutation DeleteMatch($id: ID!) {
+            deleteMatch(id: $id) {
+              success
+            }
+          }
+        `,
+        { id },
+      ),
+    );
+
+    if (!data.deleteMatch.success) {
+      throw new Error("Failed to delete match");
+    }
   } catch (error) {
     if (error instanceof OfflineError) {
       // Queue the operation

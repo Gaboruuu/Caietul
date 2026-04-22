@@ -1,0 +1,234 @@
+.container {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    border-radius: 12px;
+    padding: 20px;
+    margin: 20px 0;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    color: white;
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Roboto", "Oxygen",
+        "Ubuntu", "Cantarell", "Fira Sans", "Droid Sans", "Helvetica Neue",
+        sans-serif;
+}
+
+.header {
+    margin-bottom: 20px;
+}
+
+.header h3 {
+    margin: 0 0 15px 0;
+    font-size: 18px;
+    font-weight: 600;
+}
+
+.statusIndicators {
+    display: flex;
+    gap: 20px;
+    flex-wrap: wrap;
+    font-size: 14px;
+}
+
+.statusItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    padding: 8px 12px;
+    border-radius: 6px;
+}
+
+.label {
+    font-weight: 500;
+    opacity: 0.9;
+}
+
+.status {
+    font-weight: 600;
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-size: 13px;
+}
+
+.connected {
+    background-color: rgba(76, 175, 80, 0.3);
+    color: #a8e6c1;
+}
+
+.disconnected {
+    background-color: rgba(244, 67, 54, 0.3);
+    color: #ffcdd2;
+}
+
+.active {
+    background-color: rgba(76, 175, 80, 0.3);
+    color: #a8e6c1;
+}
+
+.inactive {
+    background-color: rgba(158, 158, 158, 0.3);
+    color: #e0e0e0;
+}
+
+.value {
+    background-color: rgba(255, 255, 255, 0.2);
+    padding: 2px 8px;
+    border-radius: 4px;
+    font-weight: 600;
+}
+
+.controls {
+    display: flex;
+    gap: 12px;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    margin-bottom: 15px;
+}
+
+.controlGroup {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+.controlGroup label {
+    font-size: 13px;
+    font-weight: 500;
+    opacity: 0.95;
+}
+
+.input {
+    padding: 8px 12px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    background: rgba(255, 255, 255, 0.1);
+    color: white;
+    font-size: 14px;
+    width: 100px;
+    transition: all 0.2s ease;
+}
+
+.input:hover:not(:disabled) {
+    background: rgba(255, 255, 255, 0.15);
+    border-color: rgba(255, 255, 255, 0.5);
+}
+
+.input:focus {
+    outline: none;
+    background: rgba(255, 255, 255, 0.2);
+    border-color: white;
+    box-shadow: 0 0 0 3px rgba(255, 255, 255, 0.1);
+}
+
+.input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+}
+
+.input::placeholder {
+    color: rgba(255, 255, 255, 0.6);
+}
+
+/* Chrome, Safari and Opera */
+.input::-webkit-outer-spin-button,
+.input::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+}
+
+/* Firefox */
+.input[type="number"] {
+    -moz-appearance: textfield;
+}
+
+.button {
+    padding: 10px 20px;
+    border: 1px solid rgba(255, 255, 255, 0.3);
+    border-radius: 6px;
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    white-space: nowrap;
+    min-width: 140px;
+}
+
+.startButton {
+    background-color: rgba(76, 175, 80, 0.3);
+    color: #a8e6c1;
+    border-color: rgba(76, 175, 80, 0.5);
+}
+
+.startButton:hover:not(:disabled) {
+    background-color: rgba(76, 175, 80, 0.5);
+    border-color: #a8e6c1;
+    box-shadow: 0 0 12px rgba(76, 175, 80, 0.3);
+    transform: translateY(-2px);
+}
+
+.startButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.stopButton {
+    background-color: rgba(244, 67, 54, 0.3);
+    color: #ffcdd2;
+    border-color: rgba(244, 67, 54, 0.5);
+}
+
+.stopButton:hover:not(:disabled) {
+    background-color: rgba(244, 67, 54, 0.5);
+    border-color: #ffcdd2;
+    box-shadow: 0 0 12px rgba(244, 67, 54, 0.3);
+    transform: translateY(-2px);
+}
+
+.stopButton:active:not(:disabled) {
+    transform: translateY(0);
+}
+
+.button:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+    transform: none;
+}
+
+.error {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background-color: rgba(244, 67, 54, 0.2);
+    border: 1px solid rgba(244, 67, 54, 0.4);
+    border-radius: 6px;
+    padding: 12px;
+    font-size: 14px;
+    color: #ffcdd2;
+}
+
+.errorIcon {
+    font-size: 16px;
+    flex-shrink: 0;
+}
+
+@media (max-width: 768px) {
+    .container {
+        padding: 16px;
+        margin: 15px 0;
+    }
+
+    .statusIndicators {
+        flex-direction: column;
+        gap: 10px;
+    }
+
+    .controls {
+        flex-direction: column;
+    }
+
+    .button {
+        width: 100%;
+        min-width: unset;
+    }
+
+    .input {
+        width: 100%;
+    }
+}
