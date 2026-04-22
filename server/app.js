@@ -14,9 +14,16 @@ export const createApp = ({ store = createMatchStore() } = {}) => {
   const app = express();
 
   app.use(express.json());
+
+  // Health check endpoint for connectivity detection
+  // Responds to both GET and HEAD requests
   app.get("/api/health", (_request, response) => {
     response.json({ status: "ok" });
   });
+  app.head("/api/health", (_request, response) => {
+    response.status(200).end();
+  });
+
   app.use("/api/matches", createMatchesRouter(store));
   app.use((_request, response) => {
     response.status(404).json({ error: "Not found" });

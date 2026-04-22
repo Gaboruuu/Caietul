@@ -1,3 +1,4 @@
+import { useEffect } from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
@@ -12,9 +13,17 @@ import DeleteConfirmPage from "./pages/DeleteConfirmPage";
 import CookieConsent from "./components/CookieConsent";
 import AppLayout from "./components/AppLayout";
 import { usePageTracking } from "./hooks/useTracking";
+import { initializeNetworkConnectivity } from "./utils/networkConnectivity";
+import { initializeSyncQueue } from "./utils/syncQueue";
 
 export default function App() {
   usePageTracking("App");
+
+  // Initialize offline support on app startup
+  useEffect(() => {
+    initializeNetworkConnectivity();
+    initializeSyncQueue();
+  }, []);
 
   return (
     <BrowserRouter>
