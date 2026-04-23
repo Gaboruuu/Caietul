@@ -28,6 +28,14 @@ export default function Header({ variant = "public" }: HeaderProps) {
             Matches
           </NavLink>
           <NavLink
+            to="/champions"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
+          >
+            Champions
+          </NavLink>
+          <NavLink
             to="/statistics"
             className={({ isActive }) =>
               `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`

@@ -4,6 +4,7 @@ import LandingPage from "./pages/LandingPage";
 import LoginPage from "./pages/LoginPage";
 import RegisterPage from "./pages/RegisterPage";
 import MatchHomePage from "./pages/MatchHomePage";
+import ChampionsPage from "./pages/ChampionsPage";
 import StatisticsPage from "./pages/StatisticsPage";
 import TiltMeterPage from "./pages/TiltMeterPage";
 import TiltMeterMatchPage from "./pages/TiltMeterMatchPage";
@@ -34,6 +35,7 @@ export default function App() {
         <Route path="/" element={<LandingPage />} />
         <Route element={<AppLayout />}>
           <Route path="/matches" element={<MatchHomePage />} />
+          <Route path="/champions" element={<ChampionsPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
           <Route path="/tilt-meter" element={<TiltMeterPage />} />
           <Route path="/tilt-meter/:id" element={<TiltMeterMatchPage />} />

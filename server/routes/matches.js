@@ -37,6 +37,13 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
   });
 
   router.post("/", (request, response) => {
+    if (!store.championStore.getByName(request.body?.champion)) {
+      return response.status(400).json({
+        error: "Validation failed",
+        details: { champion: "Champion must exist." },
+      });
+    }
+
     const errors = validateMatchInput(request.body);
     if (Object.keys(errors).length > 0) {
       return sendValidationError(response, errors);
@@ -47,6 +54,13 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
   });
 
   router.put("/:id", (request, response) => {
+    if (!store.championStore.getByName(request.body?.champion)) {
+      return response.status(400).json({
+        error: "Validation failed",
+        details: { champion: "Champion must exist." },
+      });
+    }
+
     const errors = validateMatchInput(request.body);
     if (Object.keys(errors).length > 0) {
       return sendValidationError(response, errors);

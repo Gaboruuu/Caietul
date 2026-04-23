@@ -1,0 +1,243 @@
+.page {
+    min-height: 100vh;
+    background:
+        radial-gradient(circle at top left, rgba(71, 120, 255, 0.22), transparent 28%),
+        radial-gradient(circle at top right, rgba(63, 185, 151, 0.16), transparent 24%),
+        linear-gradient(180deg, #08111f 0%, #0d1726 50%, #101b2f 100%);
+    color: #eff4ff;
+}
+
+.main {
+    width: min(1180px, calc(100% - 2rem));
+    margin: 0 auto;
+    padding: 2rem 0 4rem;
+}
+
+.hero {
+    display: flex;
+    justify-content: space-between;
+    gap: 1.5rem;
+    align-items: flex-end;
+    margin-bottom: 1.5rem;
+}
+
+.kicker {
+    margin: 0 0 0.45rem;
+    text-transform: uppercase;
+    letter-spacing: 0.2em;
+    font-size: 0.75rem;
+    color: #89b0ff;
+}
+
+.hero h1 {
+    margin: 0;
+    font-size: clamp(2.2rem, 4vw, 3.8rem);
+}
+
+.subtitle {
+    max-width: 60ch;
+    color: #b6c4e4;
+    line-height: 1.6;
+}
+
+.heroStats {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(110px, 1fr));
+    gap: 0.75rem;
+}
+
+.heroStats>div,
+.card {
+    background: rgba(9, 15, 28, 0.7);
+    border: 1px solid rgba(148, 170, 217, 0.16);
+    border-radius: 22px;
+    box-shadow: 0 24px 60px rgba(0, 0, 0, 0.28);
+    backdrop-filter: blur(18px);
+}
+
+.heroStats>div {
+    padding: 1rem 1.1rem;
+    display: flex;
+    flex-direction: column;
+    gap: 0.2rem;
+}
+
+.heroStats strong {
+    font-size: 1.7rem;
+}
+
+.heroStats span {
+    color: #9fb1d4;
+    font-size: 0.88rem;
+}
+
+.errorBanner {
+    margin-bottom: 1rem;
+    padding: 0.9rem 1rem;
+    border-radius: 16px;
+    background: rgba(171, 48, 48, 0.2);
+    border: 1px solid rgba(246, 124, 124, 0.35);
+    color: #ffd0d0;
+}
+
+.layout {
+    display: grid;
+    grid-template-columns: minmax(280px, 360px) minmax(0, 1fr);
+    gap: 1rem;
+}
+
+.card {
+    padding: 1rem;
+}
+
+.cardHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    margin-bottom: 1rem;
+}
+
+.cardHeader h2,
+.card h3 {
+    margin: 0;
+}
+
+.field {
+    display: grid;
+    gap: 0.45rem;
+    margin-bottom: 0.85rem;
+}
+
+.field span {
+    font-size: 0.88rem;
+    color: #9fb1d4;
+}
+
+.field input,
+.field select {
+    width: 100%;
+    border-radius: 14px;
+    border: 1px solid rgba(148, 170, 217, 0.2);
+    background: rgba(10, 17, 31, 0.8);
+    color: #eef4ff;
+    padding: 0.85rem 0.95rem;
+    font: inherit;
+}
+
+.field input:disabled {
+    opacity: 0.7;
+}
+
+.primaryBtn,
+.actions button,
+.linkBtn {
+    border: 0;
+    border-radius: 999px;
+    font: inherit;
+    font-weight: 700;
+    cursor: pointer;
+}
+
+.primaryBtn {
+    width: 100%;
+    padding: 0.95rem 1rem;
+    margin-top: 0.4rem;
+    background: linear-gradient(135deg, #8fc9ff 0%, #9fffe0 100%);
+    color: #08111f;
+}
+
+.linkBtn {
+    background: transparent;
+    color: #9fc2ff;
+    padding: 0.35rem 0.2rem;
+}
+
+.listColumn {
+    display: grid;
+    gap: 0.9rem;
+}
+
+.championTop {
+    display: grid;
+    grid-template-columns: auto 1fr auto;
+    gap: 0.9rem;
+    align-items: center;
+}
+
+.championIcon {
+    width: 3rem;
+    height: 3rem;
+    border-radius: 18px;
+    display: grid;
+    place-items: center;
+    background: linear-gradient(135deg, rgba(109, 146, 255, 0.24), rgba(88, 245, 182, 0.18));
+    font-size: 1.4rem;
+}
+
+.championTop h3,
+.championTop p {
+    margin: 0;
+}
+
+.championTop p {
+    color: #9fb1d4;
+    margin-top: 0.2rem;
+}
+
+.winRate {
+    font-size: 1.35rem;
+    font-weight: 800;
+    color: #a9ffcf;
+}
+
+.statGrid {
+    margin-top: 1rem;
+    display: grid;
+    grid-template-columns: repeat(3, minmax(0, 1fr));
+    gap: 0.75rem;
+}
+
+.statGrid div {
+    padding: 0.85rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.03);
+}
+
+.statGrid span {
+    display: block;
+    color: #9fb1d4;
+    font-size: 0.82rem;
+    margin-bottom: 0.25rem;
+}
+
+.actions {
+    margin-top: 1rem;
+    display: flex;
+    gap: 0.7rem;
+}
+
+.actions button {
+    flex: 1;
+    padding: 0.8rem 1rem;
+    background: rgba(255, 255, 255, 0.06);
+    color: #eff4ff;
+}
+
+.actions button:disabled {
+    cursor: not-allowed;
+    opacity: 0.55;
+}
+
+@media (max-width: 900px) {
+
+    .hero,
+    .layout {
+        grid-template-columns: 1fr;
+        display: grid;
+    }
+
+    .hero {
+        align-items: stretch;
+    }
+}

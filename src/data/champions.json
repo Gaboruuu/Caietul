@@ -1,0 +1,82 @@
+[
+  {
+    "name": "Syndra",
+    "icon": "🔮",
+    "role": "Mid"
+  },
+  {
+    "name": "Graves",
+    "icon": "🔫",
+    "role": "Jungle"
+  },
+  {
+    "name": "Nidalee",
+    "icon": "🏹",
+    "role": "Jungle"
+  },
+  {
+    "name": "Orianna",
+    "icon": "⚙️",
+    "role": "Mid"
+  },
+  {
+    "name": "Lee Sin",
+    "icon": "🐉",
+    "role": "Jungle"
+  },
+  {
+    "name": "Yasuo",
+    "icon": "⚔️",
+    "role": "Mid"
+  },
+  {
+    "name": "Ahri",
+    "icon": "🦊",
+    "role": "Mid"
+  },
+  {
+    "name": "Zed",
+    "icon": "🗡️",
+    "role": "Mid"
+  },
+  {
+    "name": "Jinx",
+    "icon": "💥",
+    "role": "Bot"
+  },
+  {
+    "name": "Maokai",
+    "icon": "🌳",
+    "role": "Top"
+  },
+  {
+    "name": "Lissandra",
+    "icon": "❄️",
+    "role": "Mid"
+  },
+  {
+    "name": "Viego",
+    "icon": "👑",
+    "role": "Jungle"
+  },
+  {
+    "name": "Aatrox",
+    "icon": "🩸",
+    "role": "Top"
+  },
+  {
+    "name": "Riven",
+    "icon": "🗡️",
+    "role": "Top"
+  },
+  {
+    "name": "Talon",
+    "icon": "🪽",
+    "role": "Mid"
+  },
+  {
+    "name": "Caitlyn",
+    "icon": "🎯",
+    "role": "Bot"
+  }
+]

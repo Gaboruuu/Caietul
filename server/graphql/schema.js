@@ -4,6 +4,10 @@ import {
   validateMatchInput,
   validatePaginationQuery,
 } from "../validation/matchValidation.js";
+import {
+  championValidationConfig,
+  validateChampionInput,
+} from "../validation/championValidation.js";
 
 const schema = buildSchema(`
   type Match {
@@ -22,6 +26,16 @@ const schema = buildSchema(`
     notes: String
   }
 
+  type Champion {
+    name: String!
+    icon: String!
+    role: String!
+    matchesCount: Int!
+    wins: Int!
+    losses: Int!
+    winRate: Float!
+  }
+
   input MatchInput {
     champion: String!
     role: String!
@@ -35,6 +49,12 @@ const schema = buildSchema(`
     date: String!
     patch: String!
     notes: String
+  }
+
+  input ChampionInput {
+    name: String!
+    icon: String!
+    role: String!
   }
 
   type MatchesPage {
@@ -72,11 +92,19 @@ const schema = buildSchema(`
     success: Boolean!
   }
 
+  type DeleteChampionResult {
+    success: Boolean!
+  }
+
   type Query {
     health: String!
     matchValidationConfig: MatchValidationConfig!
+    championValidationConfig: ChampionValidationConfig!
     matches(page: Int, pageSize: Int): MatchesPage!
     match(id: ID!): Match
+    champions: [Champion!]!
+    champion(name: ID!): Champion
+    championMatches(name: String!): [Match!]!
     generationStatus: GenerationStatus!
   }
 
@@ -84,8 +112,15 @@ const schema = buildSchema(`
     createMatch(input: MatchInput!): Match!
     updateMatch(id: ID!, input: MatchInput!): Match!
     deleteMatch(id: ID!): DeleteMatchResult!
+    createChampion(input: ChampionInput!): Champion!
+    updateChampion(name: ID!, input: ChampionInput!): Champion!
+    deleteChampion(name: ID!): DeleteChampionResult!
     startGeneration(batchSize: Int = 5, intervalMs: Int = 3000): GenerationActionResult!
     stopGeneration: GenerationActionResult!
+  }
+
+  type ChampionValidationConfig {
+    roles: [String!]!
   }
 `);
 
@@ -106,6 +141,45 @@ const throwNotFound = () => {
   });
 };
 
+const throwChampionNotFound = () => {
+  throw new GraphQLError("Champion not found", {
+    extensions: {
+      code: "NOT_FOUND",
+    },
+  });
+};
+
+const throwConflict = (message) => {
+  throw new GraphQLError(message, {
+    extensions: {
+      code: "CONFLICT",
+    },
+  });
+};
+
+const decorateChampion = (champion, matches) => {
+  const championMatches = matches.filter(
+    (match) =>
+      match.champion.trim().toLowerCase() ===
+      champion.name.trim().toLowerCase(),
+  );
+  const wins = championMatches.filter(
+    (match) => match.result === "Victory",
+  ).length;
+  const losses = championMatches.filter(
+    (match) => match.result === "Defeat",
+  ).length;
+  const total = championMatches.length;
+
+  return {
+    ...champion,
+    matchesCount: total,
+    wins,
+    losses,
+    winRate: total > 0 ? (wins / total) * 100 : 0,
+  };
+};
+
 export const createGraphQLSchema = () => schema;
 
 export const createRootResolvers = (store, dataGenerationManager) => ({
@@ -115,6 +189,10 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
 
   matchValidationConfig() {
     return matchValidationConfig;
+  },
+
+  championValidationConfig() {
+    return championValidationConfig;
   },
 
   matches({ page, pageSize }) {
@@ -148,11 +226,40 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     return store.getById(id) ?? null;
   },
 
+  champions() {
+    const matches = store.list();
+    return store.championStore
+      .list()
+      .map((champion) => decorateChampion(champion, matches));
+  },
+
+  champion({ name }) {
+    const champion = store.championStore.getByName(name);
+    if (!champion) {
+      return null;
+    }
+
+    return decorateChampion(champion, store.list());
+  },
+
+  championMatches({ name }) {
+    return store
+      .list()
+      .filter(
+        (match) =>
+          match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
+      );
+  },
+
   generationStatus() {
     return dataGenerationManager.getStatus();
   },
 
   createMatch({ input }) {
+    if (!store.championStore.getByName(input.champion)) {
+      throwValidationError({ champion: "Champion must exist." });
+    }
+
     const errors = validateMatchInput(input);
     if (Object.keys(errors).length > 0) {
       throwValidationError(errors);
@@ -162,6 +269,10 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
   },
 
   updateMatch({ id, input }) {
+    if (!store.championStore.getByName(input.champion)) {
+      throwValidationError({ champion: "Champion must exist." });
+    }
+
     const errors = validateMatchInput(input);
     if (Object.keys(errors).length > 0) {
       throwValidationError(errors);
@@ -179,6 +290,58 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     const removed = store.delete(id);
     if (!removed) {
       throwNotFound();
+    }
+
+    return { success: true };
+  },
+
+  createChampion({ input }) {
+    const errors = validateChampionInput(input);
+    if (Object.keys(errors).length > 0) {
+      throwValidationError(errors);
+    }
+
+    const created = store.championStore.create(input);
+    if (!created) {
+      throwConflict("Champion already exists");
+    }
+
+    return decorateChampion(created, store.list());
+  },
+
+  updateChampion({ name, input }) {
+    const errors = validateChampionInput(input);
+    if (Object.keys(errors).length > 0) {
+      throwValidationError(errors);
+    }
+
+    if (name.trim().toLowerCase() !== input.name.trim().toLowerCase()) {
+      throwConflict("Champion name cannot be changed");
+    }
+
+    const updated = store.championStore.update(name, input);
+    if (!updated) {
+      throwChampionNotFound();
+    }
+
+    return decorateChampion(updated, store.list());
+  },
+
+  deleteChampion({ name }) {
+    const matches = store
+      .list()
+      .filter(
+        (match) =>
+          match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
+      );
+
+    if (matches.length > 0) {
+      throwConflict("Champion still has matches and cannot be deleted");
+    }
+
+    const removed = store.championStore.delete(name);
+    if (!removed) {
+      throwChampionNotFound();
     }
 
     return { success: true };

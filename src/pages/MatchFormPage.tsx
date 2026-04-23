@@ -12,6 +12,7 @@ import {
   fetchMatchById,
   updateMatch,
 } from "../api/matchesApi";
+import { fetchChampions } from "../api/championsApi";
 import {
   ROLES,
   RESULTS,
@@ -19,6 +20,8 @@ import {
   type Role,
   type Result,
 } from "../types/match";
+import type { Champion } from "../types/champion";
+import championCatalog from "../data/champions.json";
 
 type MatchFormValues = {
   champion: string;
@@ -90,12 +93,23 @@ const numberFieldConfig: NumberFieldConfig[] = [
   { key: "visionScore", label: "Vision Score", min: 0, max: 300 },
 ];
 
+const fallbackChampions: Champion[] = championCatalog.map((champion) => ({
+  ...champion,
+  role: champion.role as Role,
+  matchesCount: 0,
+  wins: 0,
+  losses: 0,
+  winRate: 0,
+}));
+
 export default function MatchFormPage() {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const isEditing = !!id;
   const [existingMatch, setExistingMatch] = useState<Match | null>(null);
+  const [champions, setChampions] = useState<Champion[]>([]);
   const [isLoading, setIsLoading] = useState(isEditing);
+  const [isLoadingChampions, setIsLoadingChampions] = useState(true);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -136,6 +150,37 @@ export default function MatchFormPage() {
     };
   }, [id, isEditing]);
 
+  useEffect(() => {
+    let active = true;
+
+    const loadChampions = async () => {
+      setIsLoadingChampions(true);
+
+      try {
+        const loadedChampions = await fetchChampions();
+        if (active) {
+          setChampions(
+            loadedChampions.length > 0 ? loadedChampions : fallbackChampions,
+          );
+        }
+      } catch {
+        if (active) {
+          setChampions(fallbackChampions);
+        }
+      } finally {
+        if (active) {
+          setIsLoadingChampions(false);
+        }
+      }
+    };
+
+    void loadChampions();
+
+    return () => {
+      active = false;
+    };
+  }, []);
+
   const initialValues = useMemo(
     () => getInitialFormValues(existingMatch),
     [existingMatch],
@@ -146,6 +191,14 @@ export default function MatchFormPage() {
   useEffect(() => {
     setForm(initialValues);
   }, [initialValues]);
+
+  useEffect(() => {
+    if (form.champion || champions.length === 0) {
+      return;
+    }
+
+    setForm((prev) => ({ ...prev, champion: champions[0]?.name ?? "" }));
+  }, [champions, form.champion]);
 
   const setField = <K extends keyof MatchFormValues>(
     key: K,
@@ -240,6 +293,13 @@ export default function MatchFormPage() {
         <Link to="/matches" className={styles.back}>
           ← Back to matches
         </Link>
+        <Link
+          to="/champions"
+          className={styles.back}
+          style={{ marginLeft: 12 }}
+        >
+          Manage champions
+        </Link>
 
         <h1 className={styles.title}>{isEditing ? "Edit" : "Add"} Match</h1>
         <p className={styles.subtitle}>
@@ -259,14 +319,25 @@ export default function MatchFormPage() {
                 <label className={styles.label} htmlFor="champion">
                   Champion
                 </label>
-                <input
+                <select
                   id="champion"
                   className={inputClass(!!errors.champion)}
-                  type="text"
                   value={form.champion}
                   onChange={(e) => setField("champion", e.target.value)}
-                  placeholder="e.g. Syndra"
-                />
+                  disabled={isLoadingChampions || champions.length === 0}
+                >
+                  {champions.map((champion) => (
+                    <option key={champion.name} value={champion.name}>
+                      {champion.icon} {champion.name} · {champion.role}
+                    </option>
+                  ))}
+                </select>
+                {champions.length === 0 && !isLoadingChampions && (
+                  <div className={styles.errorText}>
+                    No champions exist yet. Create one in the Champions section
+                    first.
+                  </div>
+                )}
                 {errors.champion && (
                   <div className={styles.errorText}>{errors.champion}</div>
                 )}

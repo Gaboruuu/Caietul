@@ -152,6 +152,48 @@ describe("GraphQL query: match", () => {
   });
 });
 
+describe("GraphQL query: champions", () => {
+  it("returns champion stats and relation counts", async () => {
+    const body = await runGraphQL({
+      query: `
+        query Champions {
+          champions {
+            name
+            matchesCount
+            wins
+            losses
+            winRate
+          }
+        }
+      `,
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.champions.length).toBeGreaterThan(0);
+    expect(body.data.champions[0]).toHaveProperty("matchesCount");
+  });
+
+  it("returns the matches linked to a champion", async () => {
+    const body = await runGraphQL({
+      query: `
+        query ChampionMatches($name: String!) {
+          championMatches(name: $name) {
+            id
+            champion
+          }
+        }
+      `,
+      variables: { name: "Syndra" },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.championMatches.length).toBeGreaterThan(0);
+    expect(
+      body.data.championMatches.every((match) => match.champion === "Syndra"),
+    ).toBe(true);
+  });
+});
+
 describe("GraphQL mutation: createMatch", () => {
   it("creates a match", async () => {
     const body = await runGraphQL({
@@ -184,6 +226,133 @@ describe("GraphQL mutation: createMatch", () => {
 
     expect(body.errors).toBeDefined();
     expect(body.errors[0].extensions.details.kills).toBeDefined();
+  });
+});
+
+describe("GraphQL mutation: createChampion", () => {
+  it("creates a champion", async () => {
+    const body = await runGraphQL({
+      query: `
+        mutation CreateChampion($input: ChampionInput!) {
+          createChampion(input: $input) {
+            name
+            icon
+            role
+            matchesCount
+          }
+        }
+      `,
+      variables: {
+        input: {
+          name: "Test Champion",
+          icon: "🧪",
+          role: "Mid",
+        },
+      },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.createChampion.name).toBe("Test Champion");
+    expect(body.data.createChampion.matchesCount).toBe(0);
+  });
+
+  it("rejects duplicate champions", async () => {
+    await runGraphQL({
+      query: `
+        mutation CreateChampion($input: ChampionInput!) {
+          createChampion(input: $input) {
+            name
+          }
+        }
+      `,
+      variables: {
+        input: {
+          name: "Duplicate Champion",
+          icon: "🧪",
+          role: "Mid",
+        },
+      },
+    });
+
+    const body = await runGraphQL({
+      query: `
+        mutation CreateChampion($input: ChampionInput!) {
+          createChampion(input: $input) {
+            name
+          }
+        }
+      `,
+      variables: {
+        input: {
+          name: "Duplicate Champion",
+          icon: "🧪",
+          role: "Mid",
+        },
+      },
+    });
+
+    expect(body.errors).toBeDefined();
+    expect(body.errors[0].extensions.code).toBe("CONFLICT");
+  });
+});
+
+describe("GraphQL mutation: updateChampion", () => {
+  it("updates an existing champion", async () => {
+    const body = await runGraphQL({
+      query: `
+        mutation UpdateChampion($name: ID!, $input: ChampionInput!) {
+          updateChampion(name: $name, input: $input) {
+            icon
+          }
+        }
+      `,
+      variables: {
+        name: "Syndra",
+        input: {
+          name: "Syndra",
+          icon: "✨",
+          role: "Mid",
+        },
+      },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.updateChampion.icon).toBe("✨");
+  });
+});
+
+describe("GraphQL mutation: deleteChampion", () => {
+  it("removes a champion with no matches", async () => {
+    const created = await runGraphQL({
+      query: `
+        mutation CreateChampion($input: ChampionInput!) {
+          createChampion(input: $input) {
+            name
+          }
+        }
+      `,
+      variables: {
+        input: {
+          name: "Delete Me",
+          icon: "🧹",
+          role: "Mid",
+        },
+      },
+    });
+
+    const body = await runGraphQL({
+      query: `
+        mutation DeleteChampion($name: ID!) {
+          deleteChampion(name: $name) {
+            success
+          }
+        }
+      `,
+      variables: { name: created.data.createChampion.name },
+    });
+
+    expect(body.errors).toBeUndefined();
+    expect(body.data.deleteChampion.success).toBe(true);
   });
 });
 

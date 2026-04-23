@@ -2,9 +2,11 @@ import express from "express";
 import { WebSocketServer } from "ws";
 import { graphql } from "graphql";
 import { createMatchStore } from "./store/matchStore.js";
+import { createChampionStore } from "./store/championStore.js";
 import { createDataGenerationManager } from "./utils/dataGenerationManager.js";
 import { createGraphQLSchema, createRootResolvers } from "./graphql/schema.js";
 import { createMatchesRouter } from "./routes/matches.js";
+import { createChampionsRouter } from "./routes/champions.js";
 
 const jsonParseErrorHandler = (error, _request, response, next) => {
   if (error instanceof SyntaxError && "body" in error) {
@@ -14,11 +16,15 @@ const jsonParseErrorHandler = (error, _request, response, next) => {
   return next(error);
 };
 
-export const createApp = ({ store = createMatchStore() } = {}) => {
+export const createApp = ({
+  store = createMatchStore(),
+  championStore = createChampionStore(),
+} = {}) => {
   const app = express();
   const dataGenerationManager = createDataGenerationManager();
   const schema = createGraphQLSchema();
-  const rootValue = createRootResolvers(store, dataGenerationManager);
+  const domainStore = { ...store, championStore };
+  const rootValue = createRootResolvers(domainStore, dataGenerationManager);
 
   app.use(express.json());
 
@@ -31,7 +37,14 @@ export const createApp = ({ store = createMatchStore() } = {}) => {
     response.status(200).end();
   });
 
-  app.use("/api/matches", createMatchesRouter(store, dataGenerationManager));
+  app.use(
+    "/api/matches",
+    createMatchesRouter(domainStore, dataGenerationManager),
+  );
+  app.use(
+    "/api/champions",
+    createChampionsRouter(championStore, store, dataGenerationManager),
+  );
 
   app.all("/graphql", async (request, response) => {
     const source =
