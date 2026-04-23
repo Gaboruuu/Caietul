@@ -1,5 +1,5 @@
 import { Link, useNavigate } from "react-router-dom";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import styles from "../styles/MatchHomePage.module.css";
 import { formatDuration } from "../store/matchStore";
 import { fetchMatchesPage, type PaginatedMatches } from "../api/matchesApi";
@@ -106,28 +106,115 @@ const CHAMPION_MASTERY = [
 
 export default function MatchHomePage() {
   const navigate = useNavigate();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [pageData, setPageData] = useState<PaginatedMatches>({
-    page: 1,
-    pageSize: PAGE_SIZE,
-    total: 0,
-    totalPages: 0,
-    items: [],
-  });
-  const [isLoading, setIsLoading] = useState(true);
+  const [items, setItems] = useState<PaginatedMatches["items"]>([]);
+  const [total, setTotal] = useState(0);
+  const [totalPages, setTotalPages] = useState(0);
+  const [loadedPages, setLoadedPages] = useState(0);
+  const [isInitialLoading, setIsInitialLoading] = useState(true);
+  const [isLoadingMore, setIsLoadingMore] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const sentinelRef = useRef<HTMLDivElement | null>(null);
+  const pageCacheRef = useRef(new Map<number, PaginatedMatches>());
+  const inFlightRef = useRef(new Map<number, Promise<PaginatedMatches>>());
+  const appendedPagesRef = useRef(new Set<number>());
+
+  const getPage = useCallback(
+    async (page: number): Promise<PaginatedMatches> => {
+      const cached = pageCacheRef.current.get(page);
+      if (cached) {
+        return cached;
+      }
+
+      const inFlight = inFlightRef.current.get(page);
+      if (inFlight) {
+        return inFlight;
+      }
+
+      const request = fetchMatchesPage(page, PAGE_SIZE)
+        .then((data) => {
+          pageCacheRef.current.set(page, data);
+          return data;
+        })
+        .finally(() => {
+          inFlightRef.current.delete(page);
+        });
+
+      inFlightRef.current.set(page, request);
+      return request;
+    },
+    [],
+  );
+
+  const prefetchPage = useCallback(
+    (page: number, knownTotalPages: number) => {
+      if (page < 1 || (knownTotalPages > 0 && page > knownTotalPages)) {
+        return;
+      }
+
+      if (pageCacheRef.current.has(page) || inFlightRef.current.has(page)) {
+        return;
+      }
+
+      void getPage(page).catch(() => {
+        // Prefetch failures should not disrupt the visible list.
+      });
+    },
+    [getPage],
+  );
+
+  const loadNextPage = useCallback(async () => {
+    if (isInitialLoading || isLoadingMore) {
+      return;
+    }
+
+    if (totalPages > 0 && loadedPages >= totalPages) {
+      return;
+    }
+
+    const nextPage = loadedPages + 1;
+    setIsLoadingMore(true);
+    setError(null);
+
+    try {
+      const data = await getPage(nextPage);
+      if (!appendedPagesRef.current.has(nextPage)) {
+        appendedPagesRef.current.add(nextPage);
+        setItems((prev) => [...prev, ...data.items]);
+      }
+      setTotal(data.total);
+      setTotalPages(data.totalPages);
+      setLoadedPages(nextPage);
+      prefetchPage(nextPage + 1, data.totalPages);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : "Failed to load matches.");
+    } finally {
+      setIsLoadingMore(false);
+    }
+  }, [
+    getPage,
+    isInitialLoading,
+    isLoadingMore,
+    loadedPages,
+    prefetchPage,
+    totalPages,
+  ]);
 
   useEffect(() => {
     let active = true;
 
     const loadMatches = async () => {
-      setIsLoading(true);
+      setIsInitialLoading(true);
       setError(null);
 
       try {
-        const data = await fetchMatchesPage(currentPage, PAGE_SIZE);
+        const data = await getPage(1);
         if (active) {
-          setPageData(data);
+          appendedPagesRef.current = new Set([1]);
+          setItems(data.items);
+          setTotal(data.total);
+          setTotalPages(data.totalPages);
+          setLoadedPages(1);
+          prefetchPage(2, data.totalPages);
         }
       } catch (err) {
         if (active) {
@@ -137,7 +224,7 @@ export default function MatchHomePage() {
         }
       } finally {
         if (active) {
-          setIsLoading(false);
+          setIsInitialLoading(false);
         }
       }
     };
@@ -147,9 +234,33 @@ export default function MatchHomePage() {
     return () => {
       active = false;
     };
-  }, [currentPage]);
+  }, [getPage, prefetchPage]);
 
-  const safeTotalPages = Math.max(1, pageData.totalPages);
+  useEffect(() => {
+    const sentinel = sentinelRef.current;
+    if (!sentinel) {
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries) => {
+        if (entries[0]?.isIntersecting) {
+          void loadNextPage();
+        }
+      },
+      { root: null, rootMargin: "240px 0px" },
+    );
+
+    observer.observe(sentinel);
+
+    return () => {
+      observer.disconnect();
+    };
+  }, [loadNextPage]);
+
+  const hasMore = totalPages > 0 && loadedPages < totalPages;
+  const shownStart = items.length > 0 ? 1 : 0;
+  const shownEnd = Math.min(items.length, total);
 
   return (
     <div className={styles.page}>
@@ -271,22 +382,22 @@ export default function MatchHomePage() {
                   </tr>
                 </thead>
                 <tbody>
-                  {isLoading && (
+                  {isInitialLoading && (
                     <tr>
                       <td colSpan={8}>Loading matches...</td>
                     </tr>
                   )}
-                  {!isLoading && error && (
+                  {!isInitialLoading && error && items.length === 0 && (
                     <tr>
                       <td colSpan={8}>Failed to load matches: {error}</td>
                     </tr>
                   )}
-                  {!isLoading && !error && pageData.items.length === 0 && (
+                  {!isInitialLoading && !error && items.length === 0 && (
                     <tr>
                       <td colSpan={8}>No matches found.</td>
                     </tr>
                   )}
-                  {pageData.items.map((match) => (
+                  {items.map((match) => (
                     <tr
                       key={match.id}
                       onClick={() => navigate(`/matches/${match.id}`)}
@@ -368,47 +479,35 @@ export default function MatchHomePage() {
                 </tbody>
               </table>
 
-              <div className={styles.pagination}>
+              <div className={styles.infiniteFooter}>
                 <div className={styles.paginationInfo}>
-                  Showing{" "}
-                  {Math.min((currentPage - 1) * PAGE_SIZE + 1, pageData.total)}–
-                  {Math.min(currentPage * PAGE_SIZE, pageData.total)} of{" "}
-                  {pageData.total} matches
+                  Showing {shownStart}–{shownEnd} of {total} matches
                 </div>
-                <div className={styles.paginationControls}>
-                  <button
-                    className={styles.pageBtn}
-                    onClick={() => setCurrentPage(Math.max(1, currentPage - 1))}
-                    disabled={currentPage === 1}
-                  >
-                    ←
-                  </button>
-                  {Array.from({ length: safeTotalPages }, (_, i) => i + 1)
-                    .slice(
-                      Math.max(0, currentPage - 2),
-                      Math.min(safeTotalPages, currentPage + 2),
-                    )
-                    .map((page) => (
-                      <button
-                        key={page}
-                        className={`${styles.pageBtn} ${
-                          currentPage === page ? styles.pageBtnActive : ""
-                        }`}
-                        onClick={() => setCurrentPage(page)}
-                      >
-                        {page}
-                      </button>
-                    ))}
-                  <button
-                    className={styles.pageBtn}
-                    onClick={() =>
-                      setCurrentPage(Math.min(safeTotalPages, currentPage + 1))
-                    }
-                    disabled={currentPage === safeTotalPages}
-                  >
-                    →
-                  </button>
-                </div>
+                {error && items.length > 0 && (
+                  <div className={styles.loadMoreError}>
+                    Failed to load more: {error}
+                  </div>
+                )}
+                {isLoadingMore && (
+                  <div className={styles.loadMoreState}>
+                    Loading more matches...
+                  </div>
+                )}
+                {!isLoadingMore && hasMore && (
+                  <div className={styles.loadMoreHint}>
+                    Scroll down to load more
+                  </div>
+                )}
+                {!hasMore && items.length > 0 && (
+                  <div className={styles.loadMoreState}>
+                    You have reached the end.
+                  </div>
+                )}
+                <div
+                  ref={sentinelRef}
+                  className={styles.scrollSentinel}
+                  aria-hidden="true"
+                />
               </div>
             </div>
           </div>

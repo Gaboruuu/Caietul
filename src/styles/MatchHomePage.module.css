@@ -835,6 +835,35 @@
     color: rgba(255, 255, 255, 0.35);
 }
 
+.infiniteFooter {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 20px 24px;
+    border-top: 1px solid rgba(255, 255, 255, 0.06);
+}
+
+.loadMoreState,
+.loadMoreHint,
+.loadMoreError {
+    font-size: 12px;
+}
+
+.loadMoreState,
+.loadMoreHint {
+    color: rgba(255, 255, 255, 0.45);
+}
+
+.loadMoreError {
+    color: #f87171;
+}
+
+.scrollSentinel {
+    width: 100%;
+    height: 1px;
+}
+
 .paginationControls {
     display: flex;
     align-items: center;

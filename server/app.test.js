@@ -48,6 +48,32 @@ describe("GET /api/health", () => {
   });
 });
 
+describe("Matches generation endpoints", () => {
+  it("starts, reports and stops generation over HTTP", async () => {
+    const startResponse = await request(app)
+      .post("/api/matches/generation/start")
+      .send({ batchSize: 2, intervalMs: 10_000 });
+
+    expect(startResponse.status).toBe(200);
+    expect(startResponse.body.success).toBe(true);
+    expect(startResponse.body.config.batchSize).toBe(2);
+
+    const statusResponse = await request(app).get(
+      "/api/matches/generation/status",
+    );
+
+    expect(statusResponse.status).toBe(200);
+    expect(statusResponse.body.isGenerating).toBe(true);
+
+    const stopResponse = await request(app)
+      .post("/api/matches/generation/stop")
+      .send();
+
+    expect(stopResponse.status).toBe(200);
+    expect(stopResponse.body.success).toBe(true);
+  });
+});
+
 describe("GraphQL query: matches", () => {
   it("returns a paginated list", async () => {
     const body = await runGraphQL({

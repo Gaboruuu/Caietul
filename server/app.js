@@ -4,6 +4,7 @@ import { graphql } from "graphql";
 import { createMatchStore } from "./store/matchStore.js";
 import { createDataGenerationManager } from "./utils/dataGenerationManager.js";
 import { createGraphQLSchema, createRootResolvers } from "./graphql/schema.js";
+import { createMatchesRouter } from "./routes/matches.js";
 
 const jsonParseErrorHandler = (error, _request, response, next) => {
   if (error instanceof SyntaxError && "body" in error) {
@@ -29,6 +30,8 @@ export const createApp = ({ store = createMatchStore() } = {}) => {
   app.head("/api/health", (_request, response) => {
     response.status(200).end();
   });
+
+  app.use("/api/matches", createMatchesRouter(store, dataGenerationManager));
 
   app.all("/graphql", async (request, response) => {
     const source =
