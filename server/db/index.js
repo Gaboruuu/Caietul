@@ -15,6 +15,13 @@ export const initDb = async () => {
   sequelize = new Sequelize(databaseUrl, {
     dialect: "postgres",
     logging: false,
+    ssl: true,
+    dialectOptions: {
+      ssl: {
+        require: true,
+        rejectUnauthorized: false,
+      },
+    },
   });
 
   // Define models
