@@ -1,15 +1,24 @@
 import { createApp } from "./app.js";
 import { createServer } from "node:http";
+import { initDb } from "./db/index.js";
+import { createMatchStore } from "./store/matchStore.js";
+import { createChampionStore } from "./store/championStore.js";
 
 const port = Number(process.env.PORT || 3001);
 
-const app = createApp();
+// Initialize DB (if DATABASE_URL is provided)
+const models = await initDb();
+
+const store = createMatchStore(models);
+const championStore = createChampionStore(models);
+
+const app = createApp({ store, championStore });
 const server = createServer(app);
 
 // Set up WebSocket server
 app.setupWebSocket(server);
 
-server.listen(port, () => {
-  console.log(`Express API listening on http://127.0.0.1:${port}`);
-  console.log(`WebSocket server ready at ws://127.0.0.1:${port}/ws`);
+server.listen(port, "0.0.0.0", () => {
+  console.log(`Express API listening on http://0.0.0.0:${port}`);
+  console.log(`WebSocket server ready at ws://0.0.0.0:${port}/ws`);
 });

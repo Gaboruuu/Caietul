@@ -195,7 +195,7 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     return championValidationConfig;
   },
 
-  matches({ page, pageSize }) {
+  async matches({ page, pageSize }) {
     const query = {};
 
     if (page !== undefined) {
@@ -211,7 +211,7 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
       throwValidationError(pagination.errors);
     }
 
-    const pageData = store.paginate(pagination.page, pagination.pageSize);
+    const pageData = await store.paginate(pagination.page, pagination.pageSize);
 
     return {
       page: pagination.page,
@@ -222,41 +222,38 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     };
   },
 
-  match({ id }) {
-    return store.getById(id) ?? null;
+  async match({ id }) {
+    return (await store.getById(id)) ?? null;
   },
 
-  champions() {
-    const matches = store.list();
-    return store.championStore
-      .list()
-      .map((champion) => decorateChampion(champion, matches));
+  async champions() {
+    const matches = await store.list();
+    const champions = await store.championStore.list();
+    return champions.map((champion) => decorateChampion(champion, matches));
   },
 
-  champion({ name }) {
-    const champion = store.championStore.getByName(name);
+  async champion({ name }) {
+    const champion = await store.championStore.getByName(name);
     if (!champion) {
       return null;
     }
 
-    return decorateChampion(champion, store.list());
+    return decorateChampion(champion, await store.list());
   },
 
-  championMatches({ name }) {
-    return store
-      .list()
-      .filter(
-        (match) =>
-          match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
-      );
+  async championMatches({ name }) {
+    return (await store.list()).filter(
+      (match) =>
+        match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
   },
 
   generationStatus() {
     return dataGenerationManager.getStatus();
   },
 
-  createMatch({ input }) {
-    if (!store.championStore.getByName(input.champion)) {
+  async createMatch({ input }) {
+    if (!(await store.championStore.getByName(input.champion))) {
       throwValidationError({ champion: "Champion must exist." });
     }
 
@@ -265,11 +262,11 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
       throwValidationError(errors);
     }
 
-    return store.create(input);
+    return await store.create(input);
   },
 
-  updateMatch({ id, input }) {
-    if (!store.championStore.getByName(input.champion)) {
+  async updateMatch({ id, input }) {
+    if (!(await store.championStore.getByName(input.champion))) {
       throwValidationError({ champion: "Champion must exist." });
     }
 
@@ -278,7 +275,7 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
       throwValidationError(errors);
     }
 
-    const updated = store.update(id, input);
+    const updated = await store.update(id, input);
     if (!updated) {
       throwNotFound();
     }
@@ -286,8 +283,8 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     return updated;
   },
 
-  deleteMatch({ id }) {
-    const removed = store.delete(id);
+  async deleteMatch({ id }) {
+    const removed = await store.delete(id);
     if (!removed) {
       throwNotFound();
     }
@@ -295,21 +292,21 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
     return { success: true };
   },
 
-  createChampion({ input }) {
+  async createChampion({ input }) {
     const errors = validateChampionInput(input);
     if (Object.keys(errors).length > 0) {
       throwValidationError(errors);
     }
 
-    const created = store.championStore.create(input);
+    const created = await store.championStore.create(input);
     if (!created) {
       throwConflict("Champion already exists");
     }
 
-    return decorateChampion(created, store.list());
+    return decorateChampion(created, await store.list());
   },
 
-  updateChampion({ name, input }) {
+  async updateChampion({ name, input }) {
     const errors = validateChampionInput(input);
     if (Object.keys(errors).length > 0) {
       throwValidationError(errors);
@@ -319,27 +316,25 @@ export const createRootResolvers = (store, dataGenerationManager) => ({
       throwConflict("Champion name cannot be changed");
     }
 
-    const updated = store.championStore.update(name, input);
+    const updated = await store.championStore.update(name, input);
     if (!updated) {
       throwChampionNotFound();
     }
 
-    return decorateChampion(updated, store.list());
+    return decorateChampion(updated, await store.list());
   },
 
-  deleteChampion({ name }) {
-    const matches = store
-      .list()
-      .filter(
-        (match) =>
-          match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
-      );
+  async deleteChampion({ name }) {
+    const matches = (await store.list()).filter(
+      (match) =>
+        match.champion.trim().toLowerCase() === name.trim().toLowerCase(),
+    );
 
     if (matches.length > 0) {
       throwConflict("Champion still has matches and cannot be deleted");
     }
 
-    const removed = store.championStore.delete(name);
+    const removed = await store.championStore.delete(name);
     if (!removed) {
       throwChampionNotFound();
     }

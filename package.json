@@ -11,13 +11,20 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "server": "node server/index.js",
+    "db:migrate": "sequelize db:migrate --config server/config/config.cjs --migrations-path server/migrations",
+    "db:migrate:undo": "sequelize db:migrate:undo --config server/config/config.cjs --migrations-path server/migrations",
+    "db:seed": "sequelize db:seed:all --config server/config/config.cjs --seeders-path server/seeders",
     "test": "vitest run",
     "preview": "vite preview",
     "e2e": "playwright test",
     "e2e:ui": "playwright test --ui"
   },
   "dependencies": {
+    "dotenv": "^16.3.1",
     "@faker-js/faker": "^9.9.0",
+    "pg": "^8.11.2",
+    "pg-hstore": "^2.3.4",
+    "sequelize": "^6.32.1",
     "express": "^5.1.0",
     "graphql": "^16.11.0",
     "react": "^19.2.4",
@@ -26,6 +33,7 @@
     "ws": "^8.20.0"
   },
   "devDependencies": {
+    "sequelize-cli": "^6.6.1",
     "@eslint/js": "^9.39.4",
     "@playwright/test": "^1.59.1",
     "@testing-library/jest-dom": "^6.9.1",

@@ -11,13 +11,13 @@ const sendValidationError = (response, errors) =>
 export const createMatchesRouter = (store, dataGenerationManager = null) => {
   const router = Router();
 
-  router.get("/", (request, response) => {
+  router.get("/", async (request, response) => {
     const pagination = validatePaginationQuery(request.query);
     if (!pagination.ok) {
       return sendValidationError(response, pagination.errors);
     }
 
-    const pageData = store.paginate(pagination.page, pagination.pageSize);
+    const pageData = await store.paginate(pagination.page, pagination.pageSize);
     return response.json({
       page: pagination.page,
       pageSize: pagination.pageSize,
@@ -27,8 +27,8 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
     });
   });
 
-  router.get("/:id", (request, response) => {
-    const match = store.getById(request.params.id);
+  router.get("/:id", async (request, response) => {
+    const match = await store.getById(request.params.id);
     if (!match) {
       return response.status(404).json({ error: "Match not found" });
     }
@@ -36,8 +36,8 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
     return response.json(match);
   });
 
-  router.post("/", (request, response) => {
-    if (!store.championStore.getByName(request.body?.champion)) {
+  router.post("/", async (request, response) => {
+    if (!(await store.championStore.getByName(request.body?.champion))) {
       return response.status(400).json({
         error: "Validation failed",
         details: { champion: "Champion must exist." },
@@ -49,12 +49,12 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
       return sendValidationError(response, errors);
     }
 
-    const created = store.create(request.body);
+    const created = await store.create(request.body);
     return response.status(201).json(created);
   });
 
-  router.put("/:id", (request, response) => {
-    if (!store.championStore.getByName(request.body?.champion)) {
+  router.put("/:id", async (request, response) => {
+    if (!(await store.championStore.getByName(request.body?.champion))) {
       return response.status(400).json({
         error: "Validation failed",
         details: { champion: "Champion must exist." },
@@ -66,7 +66,7 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
       return sendValidationError(response, errors);
     }
 
-    const updated = store.update(request.params.id, request.body);
+    const updated = await store.update(request.params.id, request.body);
     if (!updated) {
       return response.status(404).json({ error: "Match not found" });
     }
@@ -74,8 +74,8 @@ export const createMatchesRouter = (store, dataGenerationManager = null) => {
     return response.json(updated);
   });
 
-  router.delete("/:id", (request, response) => {
-    const removed = store.delete(request.params.id);
+  router.delete("/:id", async (request, response) => {
+    const removed = await store.delete(request.params.id);
     if (!removed) {
       return response.status(404).json({ error: "Match not found" });
     }

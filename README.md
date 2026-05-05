@@ -1,6 +1,6 @@
 # Caietul
 
-Caietul is a small match management web app built with React, TypeScript, and Vite.  
+Caietul is a match management web app built with React, TypeScript, Vite, Express, GraphQL, and Sequelize.
 It lets you create, browse, inspect, and manage match entries using a clean page-based flow.
 
 ## Purpose
@@ -8,9 +8,9 @@ It lets you create, browse, inspect, and manage match entries using a clean page
 This project was created as a practical frontend exercise focused on:
 
 - organizing a React app by feature and responsibility
-- managing app state with a dedicated store layer
+- adding server-side persistence with an ORM-backed relational database
 - keeping business types and utilities separated from UI
-- writing and running basic unit tests with Vitest
+- writing and running unit and integration tests with Vitest
 
 ## Main Features
 
@@ -20,16 +20,39 @@ This project was created as a practical frontend exercise focused on:
 - Match creation/edit form page
 - Delete confirmation page
 - Reusable layout components (header/footer)
-- Local data persistence through utility/storage helpers
+- REST + GraphQL backend for matches and champions
+- Server-side persistence with Sequelize and PostgreSQL
+- CRUD, pagination, validation, and basic stats
 
 ## Tech Stack
 
 - React
 - TypeScript
 - Vite
+- Node.js / Express
+- GraphQL
+- Sequelize
+- PostgreSQL
 - CSS Modules
 - Vitest
 - ESLint
+
+## Assignment 3 Submission Notes
+
+The persistence layer is documented in [ASSIGNMENT_3_SUBMISSION.md](ASSIGNMENT_3_SUBMISSION.md).
+
+If you need a short summary for submission, the backend uses two relational tables:
+
+- `Champions` for champion metadata
+- `Matches` for individual match records
+
+The schema is in 3NF because each table stores facts about a single entity, all non-key attributes depend on the key, and there are no repeating groups or transitive dependencies inside a table.
+
+The app is designed to be deployed with:
+
+- a Node/Express web service for the backend
+- a hosted PostgreSQL database for persistence
+- a separate client machine/browser connecting to the deployed backend
 
 ## Project Structure
 
@@ -43,3 +66,19 @@ src/
   utils/        # Helpers, storage, persistence
   data/         # Seed/mock match data
 ```
+
+## Quick Start
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the ORM integration test:
+
+```bash
+npm exec vitest run server/store/matchStore.integration.test.js
+```
+
+To run the backend against PostgreSQL, set `DATABASE_URL` and use the migration commands in `package.json`.

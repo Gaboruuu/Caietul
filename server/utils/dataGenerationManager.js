@@ -38,16 +38,28 @@ export const createDataGenerationManager = () => {
       try {
         const batch = generateFakeMatchBatch(batchSize);
 
-        // Add each match to the store
-        const addedMatches = batch.map((matchData) => store.create(matchData));
+        // Add each match to the store (support async stores)
+        (async () => {
+          try {
+            const addedMatches = [];
+            for (const matchData of batch) {
+              // eslint-disable-next-line no-await-in-loop
+              const added = await store.create(matchData);
+              addedMatches.push(added);
+            }
 
-        // Notify all connected WebSocket clients
-        notifyClients("matches-batch", {
-          batchId: `batch-${Date.now()}`,
-          count: addedMatches.length,
-          matches: addedMatches,
-          timestamp: new Date().toISOString(),
-        });
+            // Notify all connected WebSocket clients
+            notifyClients("matches-batch", {
+              batchId: `batch-${Date.now()}`,
+              count: addedMatches.length,
+              matches: addedMatches,
+              timestamp: new Date().toISOString(),
+            });
+          } catch (err) {
+            console.error("[DataGen] Error adding generated matches:", err);
+            notifyClients("error", { message: err.message });
+          }
+        })();
 
         console.log(
           `[DataGen] Generated and added ${addedMatches.length} matches`,

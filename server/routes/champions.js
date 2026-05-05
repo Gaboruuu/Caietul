@@ -35,36 +35,34 @@ export const createChampionsRouter = (
 ) => {
   const router = Router();
 
-  router.get("/", (_request, response) => {
-    const matches = matchStore.list();
+  router.get("/", async (_request, response) => {
+    const matches = await matchStore.list();
+    const champions = await championStore.list();
     return response.json(
-      championStore
-        .list()
-        .map((champion) => toChampionResponse(champion, matches)),
+      champions.map((champion) => toChampionResponse(champion, matches)),
     );
   });
 
-  router.get("/:name", (request, response) => {
-    const champion = championStore.getByName(request.params.name);
+  router.get("/:name", async (request, response) => {
+    const champion = await championStore.getByName(request.params.name);
     if (!champion) {
       return response.status(404).json({ error: "Champion not found" });
     }
 
-    return response.json(toChampionResponse(champion, matchStore.list()));
+    const matches = await matchStore.list();
+    return response.json(toChampionResponse(champion, matches));
   });
 
-  router.get("/:name/matches", (request, response) => {
-    const champion = championStore.getByName(request.params.name);
+  router.get("/:name/matches", async (request, response) => {
+    const champion = await championStore.getByName(request.params.name);
     if (!champion) {
       return response.status(404).json({ error: "Champion not found" });
     }
 
-    const matches = matchStore
-      .list()
-      .filter(
-        (match) =>
-          normalizeName(match.champion) === normalizeName(request.params.name),
-      );
+    const matches = (await matchStore.list()).filter(
+      (match) =>
+        normalizeName(match.champion) === normalizeName(request.params.name),
+    );
 
     return response.json({
       champion: champion.name,
@@ -73,23 +71,23 @@ export const createChampionsRouter = (
     });
   });
 
-  router.post("/", (request, response) => {
+  router.post("/", async (request, response) => {
     const errors = validateChampionInput(request.body);
     if (Object.keys(errors).length > 0) {
       return sendValidationError(response, errors);
     }
 
-    const created = championStore.create(request.body);
+    const created = await championStore.create(request.body);
     if (!created) {
       return response.status(409).json({ error: "Champion already exists" });
     }
 
     return response
       .status(201)
-      .json(toChampionResponse(created, matchStore.list()));
+      .json(toChampionResponse(created, await matchStore.list()));
   });
 
-  router.put("/:name", (request, response) => {
+  router.put("/:name", async (request, response) => {
     const errors = validateChampionInput(request.body);
     if (Object.keys(errors).length > 0) {
       return sendValidationError(response, errors);
@@ -103,21 +101,22 @@ export const createChampionsRouter = (
         .json({ error: "Champion name cannot be changed" });
     }
 
-    const updated = championStore.update(request.params.name, request.body);
+    const updated = await championStore.update(
+      request.params.name,
+      request.body,
+    );
     if (!updated) {
       return response.status(404).json({ error: "Champion not found" });
     }
 
-    return response.json(toChampionResponse(updated, matchStore.list()));
+    return response.json(toChampionResponse(updated, await matchStore.list()));
   });
 
-  router.delete("/:name", (request, response) => {
-    const matches = matchStore
-      .list()
-      .filter(
-        (match) =>
-          normalizeName(match.champion) === normalizeName(request.params.name),
-      );
+  router.delete("/:name", async (request, response) => {
+    const matches = (await matchStore.list()).filter(
+      (match) =>
+        normalizeName(match.champion) === normalizeName(request.params.name),
+    );
 
     if (matches.length > 0) {
       return response.status(409).json({
@@ -125,7 +124,7 @@ export const createChampionsRouter = (
       });
     }
 
-    const removed = championStore.delete(request.params.name);
+    const removed = await championStore.delete(request.params.name);
     if (!removed) {
       return response.status(404).json({ error: "Champion not found" });
     }
