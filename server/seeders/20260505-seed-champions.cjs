@@ -15,7 +15,9 @@ module.exports = {
       role: c.role,
     }));
 
-    await queryInterface.bulkInsert("Champions", rows);
+    await queryInterface.bulkInsert("Champions", rows, {
+      ignoreDuplicates: true,
+    });
   },
 
   async down(queryInterface) {

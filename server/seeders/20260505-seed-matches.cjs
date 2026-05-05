@@ -25,7 +25,9 @@ module.exports = {
       notes: m.notes,
     }));
 
-    await queryInterface.bulkInsert("Matches", rows);
+    await queryInterface.bulkInsert("Matches", rows, {
+      ignoreDuplicates: true,
+    });
   },
 
   async down(queryInterface) {
