@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { API_BASE } from "../config/apiBase";
 import styles from "../styles/ChatWidget.module.css";
 
 type ChatMessage = {
@@ -18,8 +19,13 @@ export default function ChatWidget() {
       : null;
 
   useEffect(() => {
-    const host = window.location.host;
-    const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+    const isProdBackend = API_BASE.startsWith("http");
+    const protocol = isProdBackend
+      ? "wss"
+      : window.location.protocol === "https:"
+        ? "wss"
+        : "ws";
+    const host = isProdBackend ? new URL(API_BASE).host : window.location.host;
     const ws = new WebSocket(`${protocol}://${host}/ws`);
     wsRef.current = ws;
 

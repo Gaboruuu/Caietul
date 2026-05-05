@@ -1,7 +1,6 @@
 import type { Champion, ChampionInput } from "../types/champion";
+import { API_BASE } from "../config/apiBase";
 import { ApiValidationError } from "./matchesApi";
-
-const API_BASE = "https://caietul-backend.onrender.com";
 
 type GraphQLErrorPayload = {
   message?: string;

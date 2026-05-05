@@ -1,5 +1,6 @@
 import { useState, type FormEvent } from "react";
 import { Link, useNavigate } from "react-router-dom";
+import { API_BASE } from "../config/apiBase";
 import styles from "../styles/AuthPage.module.css";
 
 export default function LoginPage() {
@@ -17,7 +18,7 @@ export default function LoginPage() {
     // Call backend login endpoint
     (async () => {
       try {
-        const resp = await fetch("/api/auth/login", {
+        const resp = await fetch(`${API_BASE}/api/auth/login`, {
           method: "POST",
           headers: { "Content-Type": "application/json" },
           body: JSON.stringify({ email, password }),

@@ -12,6 +12,20 @@ const sortMatchesByDateDesc = (matches) =>
       right.id.localeCompare(left.id),
   );
 
+const hydrateMatch = (row) => {
+  const plain = row.get ? row.get({ plain: true }) : cloneMatch(row);
+  const championName =
+    plain.Champion?.name ?? plain.champion ?? plain.championId;
+
+  const { Champion, championId, ...rest } = plain;
+
+  return {
+    ...rest,
+    champion: championName,
+    championId,
+  };
+};
+
 export const createMatchStore = (
   modelsOrNull,
   initialMatches = loadSeedMatches(),
@@ -82,17 +96,20 @@ export const createMatchStore = (
   return {
     async list() {
       const rows = await Match.findAll({
+        include: [{ model: Champion, attributes: ["name"] }],
         order: [
           ["date", "DESC"],
           ["id", "ASC"],
         ],
       });
-      return rows.map((r) => r.get({ plain: true }));
+      return rows.map(hydrateMatch);
     },
 
     async getById(id) {
-      const row = await Match.findByPk(id);
-      return row ? row.get({ plain: true }) : undefined;
+      const row = await Match.findByPk(id, {
+        include: [{ model: Champion, attributes: ["name"] }],
+      });
+      return row ? hydrateMatch(row) : undefined;
     },
 
     async create(data) {
@@ -109,11 +126,17 @@ export const createMatchStore = (
         championId: champion.id,
         date: new Date(data.date),
       });
-      return created.get({ plain: true });
+
+      return {
+        ...hydrateMatch(created),
+        champion: champion.name,
+      };
     },
 
     async update(id, data) {
-      const row = await Match.findByPk(id);
+      const row = await Match.findByPk(id, {
+        include: [{ model: Champion, attributes: ["name"] }],
+      });
       if (!row) return null;
 
       const champion = await Champion.findOne({
@@ -126,7 +149,11 @@ export const createMatchStore = (
         championId: champion.id,
         date: new Date(data.date),
       });
-      return row.get({ plain: true });
+
+      return {
+        ...hydrateMatch(row),
+        champion: champion.name,
+      };
     },
 
     async delete(id) {
@@ -139,13 +166,14 @@ export const createMatchStore = (
       const { count, rows } = await Match.findAndCountAll({
         limit: pageSize,
         offset,
+        include: [{ model: Champion, attributes: ["name"] }],
         order: [
           ["date", "DESC"],
           ["id", "ASC"],
         ],
       });
       return {
-        items: rows.map((r) => r.get({ plain: true })),
+        items: rows.map(hydrateMatch),
         total: count,
         totalPages: count === 0 ? 0 : Math.ceil(count / pageSize),
       };

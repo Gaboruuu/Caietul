@@ -3,7 +3,7 @@
  * Monitors online/offline status and provides connectivity information
  */
 
-const API_BASE = "https://caietul-backend.onrender.com";
+import { API_BASE } from "../config/apiBase";
 
 type ConnectivityListener = (isOnline: boolean) => void;
 

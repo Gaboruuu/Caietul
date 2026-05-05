@@ -3,8 +3,7 @@
  */
 
 import { useEffect, useState, useCallback, useRef } from "react";
-
-const API_BASE = "https://caietul-backend.onrender.com";
+import { API_BASE } from "../config/apiBase";
 
 export interface DataGeneration {
   isGenerating: boolean;

@@ -1,11 +1,10 @@
 import type { Match } from "../types/match";
+import { API_BASE } from "../config/apiBase";
 import {
   isNetworkOnline,
   checkServerConnectivity,
 } from "../utils/networkConnectivity";
 import { queueOperation } from "../utils/syncQueue";
-
-const API_BASE = "https://caietul-backend.onrender.com";
 
 export type PaginatedMatches = {
   page: number;

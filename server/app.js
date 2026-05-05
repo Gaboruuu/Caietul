@@ -30,6 +30,27 @@ export const createApp = ({
   const domainStore = { ...store, championStore };
   const rootValue = createRootResolvers(domainStore, dataGenerationManager);
 
+  app.use((request, response, next) => {
+    const origin = request.headers.origin;
+
+    response.setHeader("Access-Control-Allow-Origin", origin || "*");
+    response.setHeader("Vary", "Origin");
+    response.setHeader(
+      "Access-Control-Allow-Methods",
+      "GET,POST,PUT,PATCH,DELETE,OPTIONS,HEAD",
+    );
+    response.setHeader(
+      "Access-Control-Allow-Headers",
+      "Content-Type, Authorization",
+    );
+
+    if (request.method === "OPTIONS") {
+      return response.status(204).end();
+    }
+
+    return next();
+  });
+
   app.use(express.json());
 
   // Health check endpoint for connectivity detection

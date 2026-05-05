@@ -3,11 +3,58 @@ import { createServer } from "node:http";
 import { initDb } from "./db/index.js";
 import { createMatchStore } from "./store/matchStore.js";
 import { createChampionStore } from "./store/championStore.js";
+import { loadSeedChampions } from "./data/seedChampions.js";
+import { loadSeedMatches } from "./data/seedMatches.js";
 
 const port = Number(process.env.PORT || 3001);
 
 // Initialize DB (if DATABASE_URL is provided)
 const models = await initDb();
+
+const seedDatabaseIfEmpty = async (dbModels) => {
+  if (!dbModels?.Champion || !dbModels?.Match) {
+    return;
+  }
+
+  const championCount = await dbModels.Champion.count();
+  const matchCount = await dbModels.Match.count();
+
+  if (championCount === 0) {
+    const champions = loadSeedChampions().map((champion) => ({
+      id: `champ-${champion.name.replace(/\s+/g, "-").toLowerCase()}`,
+      ...champion,
+    }));
+
+    await dbModels.Champion.bulkCreate(champions, {
+      ignoreDuplicates: true,
+    });
+  }
+
+  if (matchCount === 0) {
+    const championRows = await dbModels.Champion.findAll();
+    const championIdByName = new Map(
+      championRows.map((champion) => [champion.name, champion.id]),
+    );
+
+    const matches = loadSeedMatches().map((match) => {
+      const championId = championIdByName.get(match.champion);
+      if (!championId) {
+        throw new Error(`Missing champion seed for ${match.champion}`);
+      }
+
+      return {
+        ...match,
+        championId,
+      };
+    });
+
+    await dbModels.Match.bulkCreate(matches, {
+      ignoreDuplicates: true,
+    });
+  }
+};
+
+await seedDatabaseIfEmpty(models);
 
 const store = createMatchStore(models);
 const championStore = createChampionStore(models);

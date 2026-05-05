@@ -7,15 +7,15 @@ export default defineConfig({
   server: {
     proxy: {
       "/graphql": {
-        target: "http://127.0.0.1:3001",
+        target: "https://caietul-backend.onrender.com",
         changeOrigin: true,
       },
       "/api": {
-        target: "http://127.0.0.1:3001",
+        target: "https://caietul-backend.onrender.com",
         changeOrigin: true,
       },
       "/ws": {
-        target: "ws://127.0.0.1:3001",
+        target: "wss://caietul-backend.onrender.com",
         ws: true,
         changeOrigin: true,
       },

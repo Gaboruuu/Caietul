@@ -78,5 +78,20 @@
     "name": "Caitlyn",
     "icon": "🎯",
     "role": "Bot"
+  },
+  {
+    "name": "Kha'Zix",
+    "icon": "🪲",
+    "role": "Jungle"
+  },
+  {
+    "name": "Viktor",
+    "icon": "⚡",
+    "role": "Mid"
+  },
+  {
+    "name": "Hecarim",
+    "icon": "🐎",
+    "role": "Jungle"
   }
 ]
