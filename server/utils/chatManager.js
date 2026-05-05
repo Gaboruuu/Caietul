@@ -15,7 +15,7 @@ export const createChatManager = (opts = {}) => {
   }
 
   const adapter = new JSONFile(filePath);
-  const db = new Low(adapter);
+  const db = new Low(adapter, { messages: [] });
 
   const wsClients = new Set();
 
