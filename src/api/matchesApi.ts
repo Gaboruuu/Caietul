@@ -5,6 +5,8 @@ import {
 } from "../utils/networkConnectivity";
 import { queueOperation } from "../utils/syncQueue";
 
+const API_BASE = "https://caietul-backend.onrender.com";
+
 export type PaginatedMatches = {
   page: number;
   pageSize: number;
@@ -94,7 +96,7 @@ const graphqlRequest = async <T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> => {
-  const response = await fetch("/graphql", {
+  const response = await fetch(`${API_BASE}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",

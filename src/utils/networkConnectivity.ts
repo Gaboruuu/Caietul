@@ -3,6 +3,8 @@
  * Monitors online/offline status and provides connectivity information
  */
 
+const API_BASE = "https://caietul-backend.onrender.com";
+
 type ConnectivityListener = (isOnline: boolean) => void;
 
 const listeners = new Set<ConnectivityListener>();
@@ -39,7 +41,7 @@ export const isNetworkOnline = (): boolean => isOnline;
  */
 export const checkServerConnectivity = async (): Promise<boolean> => {
   try {
-    const response = await fetch("/api/health", {
+    const response = await fetch(`${API_BASE}/api/health`, {
       method: "HEAD",
       cache: "no-store",
     });

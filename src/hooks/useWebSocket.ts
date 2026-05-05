@@ -4,6 +4,8 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 
+const API_BASE = "https://caietul-backend.onrender.com";
+
 export interface DataGeneration {
   isGenerating: boolean;
   connectedClients: number;
@@ -64,9 +66,7 @@ export function useWebSocket(
 
   const connect = useCallback(() => {
     try {
-      const url =
-        wsUrl ||
-        `${window.location.protocol === "https:" ? "wss:" : "ws:"}//${window.location.host}/ws`;
+      const url = wsUrl || `wss://caietul-backend.onrender.com/ws`;
 
       console.log("[WebSocket] Connecting to:", url);
       const ws = new WebSocket(url);
@@ -203,7 +203,7 @@ const invokeGraphQL = async <T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> => {
-  const response = await fetch("/graphql", {
+  const response = await fetch(`${API_BASE}/graphql`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, variables }),

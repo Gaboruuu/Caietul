@@ -1,6 +1,8 @@
 import type { Champion, ChampionInput } from "../types/champion";
 import { ApiValidationError } from "./matchesApi";
 
+const API_BASE = "https://caietul-backend.onrender.com";
+
 type GraphQLErrorPayload = {
   message?: string;
   extensions?: {
@@ -30,7 +32,7 @@ const graphqlRequest = async <T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> => {
-  const response = await fetch("/graphql", {
+  const response = await fetch(`${API_BASE}/graphql`, {
     method: "POST",
     headers: {
       "Content-Type": "application/json",
