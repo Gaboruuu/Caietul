@@ -10,6 +10,7 @@ module.exports = {
       FROM "Users" u, "Roles" r
       WHERE (u.email = 'admin@example.com' AND r.name = 'admin')
       OR (u.email = 'user@example.com' AND r.name = 'user')
+      ON CONFLICT ("userId", "roleId") DO NOTHING
     `);
   },
 

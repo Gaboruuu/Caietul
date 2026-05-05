@@ -4,9 +4,12 @@ services:
     runtime: node
     rootDir: .
     buildCommand: npm install
+    preDeployCommand: npm run db:migrate && npm run db:seed
     startCommand: npm run server
     envVars:
       - key: PORT
         value: 10000
+      - key: NODE_ENV
+        value: production
       - key: DATABASE_URL
         sync: false

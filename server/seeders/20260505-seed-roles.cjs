@@ -1,26 +1,28 @@
 "use strict";
 
+const { randomUUID } = require("node:crypto");
+
 module.exports = {
   async up(queryInterface, Sequelize) {
     await queryInterface.bulkInsert(
       "Roles",
       [
         {
-          id: Sequelize.literal("gen_random_uuid()"),
+          id: randomUUID(),
           name: "admin",
           description: "Full system administrator",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
         {
-          id: Sequelize.literal("gen_random_uuid()"),
+          id: randomUUID(),
           name: "user",
           description: "Normal application user",
           createdAt: new Date(),
           updatedAt: new Date(),
         },
       ],
-      {},
+      { ignoreDuplicates: true },
     );
   },
 

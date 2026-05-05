@@ -67,7 +67,12 @@ export const initDb = async () => {
   const User = sequelize.define(
     "User",
     {
-      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
+      },
       email: { type: DataTypes.STRING, allowNull: false, unique: true },
       password: { type: DataTypes.STRING, allowNull: false },
       name: { type: DataTypes.STRING },
@@ -78,7 +83,12 @@ export const initDb = async () => {
   const Role = sequelize.define(
     "Role",
     {
-      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
+      },
       name: { type: DataTypes.STRING, allowNull: false, unique: true },
       description: { type: DataTypes.STRING },
     },
@@ -88,7 +98,12 @@ export const initDb = async () => {
   const Permission = sequelize.define(
     "Permission",
     {
-      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      id: {
+        type: DataTypes.UUID,
+        primaryKey: true,
+        allowNull: false,
+        defaultValue: DataTypes.UUIDV4,
+      },
       name: { type: DataTypes.STRING, allowNull: false, unique: true },
       description: { type: DataTypes.STRING },
     },

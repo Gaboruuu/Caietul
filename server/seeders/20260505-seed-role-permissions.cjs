@@ -8,6 +8,7 @@ module.exports = {
       FROM "Roles" r, "Permissions" p
       WHERE (r.name = 'admin' AND p.name = 'manage_all')
       OR (r.name = 'user' AND p.name = 'view_only')
+      ON CONFLICT ("roleId", "permissionId") DO NOTHING
     `);
   },
 
