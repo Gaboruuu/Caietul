@@ -63,7 +63,52 @@ export const initDb = async () => {
   Champion.hasMany(Match, { foreignKey: "championId" });
   Match.belongsTo(Champion, { foreignKey: "championId" });
 
+  // User / Role / Permission models for auth
+  const User = sequelize.define(
+    "User",
+    {
+      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      email: { type: DataTypes.STRING, allowNull: false, unique: true },
+      password: { type: DataTypes.STRING, allowNull: false },
+      name: { type: DataTypes.STRING },
+    },
+    { tableName: "Users" },
+  );
+
+  const Role = sequelize.define(
+    "Role",
+    {
+      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      name: { type: DataTypes.STRING, allowNull: false, unique: true },
+      description: { type: DataTypes.STRING },
+    },
+    { tableName: "Roles" },
+  );
+
+  const Permission = sequelize.define(
+    "Permission",
+    {
+      id: { type: DataTypes.UUID, primaryKey: true, allowNull: false },
+      name: { type: DataTypes.STRING, allowNull: false, unique: true },
+      description: { type: DataTypes.STRING },
+    },
+    { tableName: "Permissions" },
+  );
+
+  // Associations: many-to-many
+  User.belongsToMany(Role, { through: "UserRoles", foreignKey: "userId" });
+  Role.belongsToMany(User, { through: "UserRoles", foreignKey: "roleId" });
+
+  Role.belongsToMany(Permission, {
+    through: "RolePermissions",
+    foreignKey: "roleId",
+  });
+  Permission.belongsToMany(Role, {
+    through: "RolePermissions",
+    foreignKey: "permissionId",
+  });
+
   await sequelize.authenticate();
 
-  return { sequelize, Champion, Match };
+  return { sequelize, Champion, Match, User, Role, Permission };
 };

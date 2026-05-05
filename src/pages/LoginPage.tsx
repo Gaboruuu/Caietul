@@ -14,7 +14,34 @@ export default function LoginPage() {
       return;
     }
 
-    navigate("/");
+    // Call backend login endpoint
+    (async () => {
+      try {
+        const resp = await fetch("/api/auth/login", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ email, password }),
+        });
+
+        if (!resp.ok) {
+          // simple alert for now
+          const err = await resp.json();
+          alert(err.error || "Login failed");
+          return;
+        }
+
+        const body = await resp.json();
+        localStorage.setItem("currentUser", JSON.stringify(body.user));
+        localStorage.setItem("currentRoles", JSON.stringify(body.roles || []));
+
+        navigate("/matches");
+      } catch (err) {
+        // network or unexpected
+        // eslint-disable-next-line no-console
+        console.error("Login error", err);
+        alert("Login error");
+      }
+    })();
   };
 
   return (

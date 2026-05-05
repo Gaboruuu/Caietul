@@ -12,7 +12,7 @@ const models = await initDb();
 const store = createMatchStore(models);
 const championStore = createChampionStore(models);
 
-const app = createApp({ store, championStore });
+const app = createApp({ store, championStore, models });
 const server = createServer(app);
 
 // Set up WebSocket server

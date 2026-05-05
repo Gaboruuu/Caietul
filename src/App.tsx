@@ -11,6 +11,7 @@ import TiltMeterMatchPage from "./pages/TiltMeterMatchPage";
 import MatchDetailPage from "./pages/MatchDetailPage";
 import MatchFormPage from "./pages/MatchFormPage";
 import DeleteConfirmPage from "./pages/DeleteConfirmPage";
+import ChatPage from "./pages/ChatPage";
 import CookieConsent from "./components/CookieConsent";
 import AppLayout from "./components/AppLayout";
 import { usePageTracking } from "./hooks/useTracking";
@@ -43,6 +44,7 @@ export default function App() {
           <Route path="/matches/new" element={<MatchFormPage />} />
           <Route path="/matches/:id/edit" element={<MatchFormPage />} />
           <Route path="/matches/:id/delete" element={<DeleteConfirmPage />} />
+          <Route path="/chat" element={<ChatPage />} />
         </Route>
         <Route path="*" element={<Navigate to="/" replace />} />
       </Routes>

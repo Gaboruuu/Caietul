@@ -30,7 +30,9 @@
     "react": "^19.2.4",
     "react-dom": "^19.2.4",
     "react-router-dom": "^7.13.2",
-    "ws": "^8.20.0"
+    "ws": "^8.20.0",
+    "lowdb": "^6.0.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "sequelize-cli": "^6.6.1",

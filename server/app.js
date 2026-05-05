@@ -4,6 +4,7 @@ import { graphql } from "graphql";
 import { createMatchStore } from "./store/matchStore.js";
 import { createChampionStore } from "./store/championStore.js";
 import { createDataGenerationManager } from "./utils/dataGenerationManager.js";
+import { createChatManager } from "./utils/chatManager.js";
 import { createGraphQLSchema, createRootResolvers } from "./graphql/schema.js";
 import { createMatchesRouter } from "./routes/matches.js";
 import { createChampionsRouter } from "./routes/champions.js";
@@ -16,9 +17,12 @@ const jsonParseErrorHandler = (error, _request, response, next) => {
   return next(error);
 };
 
+import { createAuthRouter } from "./routes/auth.js";
+
 export const createApp = ({
   store = createMatchStore(),
   championStore = createChampionStore(),
+  models = null,
 } = {}) => {
   const app = express();
   const dataGenerationManager = createDataGenerationManager();
@@ -45,6 +49,11 @@ export const createApp = ({
     "/api/champions",
     createChampionsRouter(championStore, store, dataGenerationManager),
   );
+
+  // Authentication routes (if models available)
+  if (models) {
+    app.use("/api/auth", createAuthRouter(models));
+  }
 
   app.all("/graphql", async (request, response) => {
     const source =
@@ -97,11 +106,28 @@ export const createApp = ({
   });
 
   // Attach WebSocket setup for HTTP server
+  // Attach WebSocket setup for HTTP server
   app.setupWebSocket = (server) => {
     const wss = new WebSocketServer({ server, path: "/ws" });
 
+    // Create chat manager (persists chat to ./server/data/chat.json)
+    const chatManager = createChatManager({
+      filePath: "./server/data/chat.json",
+    });
+
     wss.on("connection", (ws) => {
+      // Add client to both managers
       dataGenerationManager.addClient(ws);
+      chatManager.addClient(ws);
+
+      ws.on("message", async (message) => {
+        // Let chat manager handle chat messages
+        try {
+          await chatManager.handleMessage(ws, message);
+        } catch (err) {
+          console.error("[WS] message handling error", err);
+        }
+      });
     });
 
     return wss;

@@ -51,6 +51,14 @@ export default function Header({ variant = "public" }: HeaderProps) {
           >
             Tilt Meter
           </NavLink>
+          <NavLink
+            to="/chat"
+            className={({ isActive }) =>
+              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+            }
+          >
+            Chat
+          </NavLink>
         </nav>
       </header>
     );
