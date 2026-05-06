@@ -11,15 +11,20 @@ export const createDataGenerationManager = () => {
   const notifyClients = (type, data) => {
     const message = JSON.stringify({ type, data, timestamp: Date.now() });
 
-    wsClients.forEach((client) => {
+    // Snapshot before iterating so we can prune dead clients safely.
+    const clients = Array.from(wsClients);
+    for (const client of clients) {
       if (client.readyState === 1) {
-        // WebSocket.OPEN
-        client.send(message);
+        try {
+          client.send(message);
+        } catch (err) {
+          console.error("[WS] send failed", err.message);
+          wsClients.delete(client);
+        }
       } else {
-        // Remove closed connections
         wsClients.delete(client);
       }
-    });
+    }
   };
 
   const startGeneration = (store, options = {}) => {

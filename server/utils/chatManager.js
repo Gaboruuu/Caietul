@@ -41,25 +41,42 @@ export const createChatManager = (opts = {}) => {
 
   const broadcast = (payload) => {
     const text = JSON.stringify(payload);
-    wsClients.forEach((client) => {
+    // Snapshot before iterating so we can prune dead clients safely.
+    const clients = Array.from(wsClients);
+    for (const client of clients) {
       if (client.readyState === 1) {
-        client.send(text);
+        try {
+          client.send(text);
+        } catch (err) {
+          console.error("[Chat] send failed", err);
+          wsClients.delete(client);
+        }
       } else {
         wsClients.delete(client);
       }
-    });
+    }
   };
 
   const addClient = async (ws) => {
     wsClients.add(ws);
 
-    // Send recent messages to the new client
-    const recent = await getRecentMessages(100);
-    ws.send(JSON.stringify({ type: "chat-history", data: recent }));
-
     ws.on("close", () => {
       wsClients.delete(ws);
     });
+    ws.on("error", () => {
+      wsClients.delete(ws);
+    });
+
+    // Send recent messages. Guard against the client disconnecting during
+    // the async db read.
+    try {
+      const recent = await getRecentMessages(100);
+      if (ws.readyState === 1) {
+        ws.send(JSON.stringify({ type: "chat-history", data: recent }));
+      }
+    } catch (err) {
+      console.error("[Chat] failed to send chat-history", err);
+    }
   };
 
   const handleMessage = async (ws, raw) => {

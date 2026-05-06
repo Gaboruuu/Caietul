@@ -116,7 +116,13 @@ export const createApp = ({
 
   // Attach WebSocket setup for HTTP server
   app.setupWebSocket = (server) => {
-    const wss = new WebSocketServer({ server, path: "/ws" });
+    // Disable permessage-deflate to avoid some proxies/load-balancers
+    // rejecting WebSocket upgrade requests that advertise this extension.
+    const wss = new WebSocketServer({
+      server,
+      path: "/ws",
+      perMessageDeflate: false,
+    });
 
     // Create chat manager (persists chat to ./server/data/chat.json)
     const chatManager = createChatManager({

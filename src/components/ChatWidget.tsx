@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { API_BASE } from "../config/apiBase";
 import styles from "../styles/ChatWidget.module.css";
 
@@ -16,12 +16,20 @@ export default function ChatWidget() {
   const wsRef = useRef<WebSocket | null>(null);
   const retryRef = useRef<number>(0);
   const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-  const connectTriggerRef = useRef<number>(0);
   const [connectTrigger, setConnectTrigger] = useState(0);
-  const user =
-    typeof window !== "undefined"
-      ? JSON.parse(localStorage.getItem("currentUser") || "null")
-      : null;
+
+  // Read user once and memoize. Re-parsing localStorage on every render
+  // produced a new object reference each time, which made the WS effect
+  // re-fire on every re-render and tear down the socket immediately.
+  const user = useMemo(() => {
+    if (typeof window === "undefined") return null;
+    try {
+      return JSON.parse(localStorage.getItem("currentUser") || "null");
+    } catch {
+      return null;
+    }
+  }, []);
+  const userKey = user?.email || user?.id || "anonymous";
 
   useEffect(() => {
     // Connect directly to backend WebSocket (bypass Vite proxy issues)
@@ -33,6 +41,10 @@ export default function ChatWidget() {
         : "https://caietul-backend.onrender.com";
 
     const wsUrl = backendUrl.replace(/^http/, "ws") + "/ws";
+
+    // Tracks whether this effect's cleanup has run. Prevents the close handler
+    // from scheduling a reconnect for a socket we deliberately closed.
+    let cancelled = false;
 
     console.log("Connecting to WebSocket:", wsUrl);
     const ws = new WebSocket(wsUrl);
@@ -72,28 +84,32 @@ export default function ChatWidget() {
       });
       setIsConnected(false);
 
+      if (cancelled) return;
+
       // Attempt reconnect with exponential backoff
       const retry = Math.min((retryRef.current || 0) + 1, 6); // cap retries
       retryRef.current = retry;
       const delay = Math.min(1000 * 2 ** (retry - 1), 30000);
       console.log(`Reconnecting in ${delay}ms (attempt ${retry})`);
       reconnectTimerRef.current = setTimeout(() => {
-        // trigger effect re-run by updating a ref timestamp
-        connectTriggerRef.current = Date.now();
-        setConnectTrigger(connectTriggerRef.current);
+        setConnectTrigger((n) => n + 1);
       }, delay);
     });
 
     return () => {
+      cancelled = true;
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = null;
       }
-      if (ws.readyState !== WebSocket.CLOSED) {
+      if (
+        ws.readyState === WebSocket.OPEN ||
+        ws.readyState === WebSocket.CONNECTING
+      ) {
         ws.close();
       }
     };
-  }, [user, connectTrigger]);
+  }, [userKey, connectTrigger]);
 
   const send = () => {
     if (!text.trim() || !wsRef.current) return;
