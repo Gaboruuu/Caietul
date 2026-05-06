@@ -20,17 +20,26 @@ export default function ChatWidget() {
       : null;
 
   useEffect(() => {
-    const isProdBackend = API_BASE.startsWith("http");
-    const protocol = isProdBackend
-      ? "wss"
-      : window.location.protocol === "https:"
-        ? "wss"
-        : "ws";
-    const host = isProdBackend ? new URL(API_BASE).host : window.location.host;
-    const ws = new WebSocket(`${protocol}://${host}/ws`);
+    // Determine WebSocket URL
+    let wsUrl: string;
+    
+    if (import.meta.env.PROD && API_BASE) {
+      // Production: connect directly to backend
+      const backendUrl = new URL(API_BASE);
+      const protocol = backendUrl.protocol === "https:" ? "wss" : "ws";
+      wsUrl = `${protocol}://${backendUrl.host}/ws`;
+    } else {
+      // Development: use relative URL to proxy through Vite
+      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
+      wsUrl = `${protocol}://${window.location.host}/ws`;
+    }
+
+    console.log("Connecting to WebSocket:", wsUrl);
+    const ws = new WebSocket(wsUrl);
     wsRef.current = ws;
 
     ws.addEventListener("open", () => {
+      console.log("WebSocket connected");
       setIsConnected(true);
       // Identify ourselves to the server
       ws.send(JSON.stringify({ type: "identify", data: { user } }));
@@ -55,11 +64,14 @@ export default function ChatWidget() {
     });
 
     ws.addEventListener("close", () => {
+      console.log("WebSocket closed");
       setIsConnected(false);
     });
 
     return () => {
-      ws.close();
+      if (ws.readyState !== WebSocket.CLOSED) {
+        ws.close();
+      }
     };
   }, [user]);
 
