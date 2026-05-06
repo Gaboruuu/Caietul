@@ -18,6 +18,7 @@ export default defineConfig({
         target: "wss://caietul-backend.onrender.com",
         ws: true,
         changeOrigin: true,
+        rejectUnauthorized: false,
       },
     },
   },
