@@ -12,6 +12,7 @@ type ChatMessage = {
 export default function ChatWidget() {
   const [messages, setMessages] = useState<ChatMessage[]>([]);
   const [text, setText] = useState("");
+  const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
   const user =
     typeof window !== "undefined"
@@ -30,6 +31,7 @@ export default function ChatWidget() {
     wsRef.current = ws;
 
     ws.addEventListener("open", () => {
+      setIsConnected(true);
       // Identify ourselves to the server
       ws.send(JSON.stringify({ type: "identify", data: { user } }));
     });
@@ -47,6 +49,15 @@ export default function ChatWidget() {
       }
     });
 
+    ws.addEventListener("error", (error) => {
+      console.error("WebSocket error:", error);
+      setIsConnected(false);
+    });
+
+    ws.addEventListener("close", () => {
+      setIsConnected(false);
+    });
+
     return () => {
       ws.close();
     };
@@ -54,6 +65,16 @@ export default function ChatWidget() {
 
   const send = () => {
     if (!text.trim() || !wsRef.current) return;
+
+    // Check if WebSocket is in OPEN state (readyState === 1)
+    if (wsRef.current.readyState !== WebSocket.OPEN) {
+      console.warn(
+        "WebSocket is not in OPEN state. Current state:",
+        wsRef.current.readyState,
+      );
+      return;
+    }
+
     const payload = {
       type: "chat",
       data: { author: user?.email || "anonymous", text },
