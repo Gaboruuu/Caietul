@@ -368,7 +368,8 @@ export const resolveObservation = async (models, observationId) => {
     return null;
   }
 
-  const observation = await models.SuspiciousObservation.findByPk(observationId);
+  const observation =
+    await models.SuspiciousObservation.findByPk(observationId);
   if (!observation) {
     return null;
   }

@@ -35,7 +35,9 @@ export default function SecurityPage() {
       setDashboard(data);
     } catch (err) {
       setError(
-        err instanceof Error ? err.message : "Failed to load security dashboard",
+        err instanceof Error
+          ? err.message
+          : "Failed to load security dashboard",
       );
     } finally {
       setIsLoading(false);
@@ -48,7 +50,8 @@ export default function SecurityPage() {
 
   const observedUsers = useMemo(
     () =>
-      dashboard?.observations.filter((item) => item.status === "observed") ?? [],
+      dashboard?.observations.filter((item) => item.status === "observed") ??
+      [],
     [dashboard],
   );
 
@@ -75,7 +78,8 @@ export default function SecurityPage() {
             <p className={styles.kicker}>Restricted</p>
             <h1>Security review is limited to admins.</h1>
             <p className={styles.heroText}>
-              The observation list and audit trail are only available to users with the admin role.
+              The observation list and audit trail are only available to users
+              with the admin role.
             </p>
           </div>
         </section>
@@ -93,7 +97,8 @@ export default function SecurityPage() {
           <p className={styles.kicker}>Admin Security Console</p>
           <h1>Audit trail and observation list</h1>
           <p className={styles.heroText}>
-            Every authenticated request is persisted, scored for risk, and surfaced here when the heuristic engine flags an account.
+            Every authenticated request is persisted, scored for risk, and
+            surfaced here when the heuristic engine flags an account.
           </p>
           <div className={styles.summaryGrid}>
             <div className={styles.summaryCard}>
@@ -109,7 +114,9 @@ export default function SecurityPage() {
               <strong>{summary?.highestRiskScore ?? 0}</strong>
             </div>
             <div className={styles.summaryCard}>
-              <span className={styles.summaryLabel}>Recent suspicious logs</span>
+              <span className={styles.summaryLabel}>
+                Recent suspicious logs
+              </span>
               <strong>{summary?.recentSuspiciousLogs ?? 0}</strong>
             </div>
           </div>
@@ -153,7 +160,9 @@ export default function SecurityPage() {
                       <tr key={observation.id}>
                         <td>
                           <strong>{observation.userEmail}</strong>
-                          <div className={styles.subtle}>{observation.userId}</div>
+                          <div className={styles.subtle}>
+                            {observation.userId}
+                          </div>
                         </td>
                         <td>{observation.userGroup}</td>
                         <td>
@@ -199,17 +208,23 @@ export default function SecurityPage() {
             </div>
 
             {recentLogs.length === 0 ? (
-              <div className={styles.emptyState}>No audit entries were returned.</div>
+              <div className={styles.emptyState}>
+                No audit entries were returned.
+              </div>
             ) : (
               <div className={styles.logList}>
                 {recentLogs.map((log: SecurityLog) => (
                   <article key={log.id} className={styles.logCard}>
                     <div className={styles.logTopRow}>
                       <div>
-                        <strong>{log.userEmail || log.userId || "Anonymous"}</strong>
+                        <strong>
+                          {log.userEmail || log.userId || "Anonymous"}
+                        </strong>
                         <div className={styles.subtle}>{log.entrySummary}</div>
                       </div>
-                      <span className={styles.metaBadge}>{log.requestMethod}</span>
+                      <span className={styles.metaBadge}>
+                        {log.requestMethod}
+                      </span>
                     </div>
                     <div className={styles.logMeta}>
                       <span>{log.requestPath}</span>
@@ -217,7 +232,9 @@ export default function SecurityPage() {
                       <span>Status {log.statusCode}</span>
                       <span>Risk {log.riskScore}</span>
                     </div>
-                    <div className={styles.logAction}>{log.actionInformation}</div>
+                    <div className={styles.logAction}>
+                      {log.actionInformation}
+                    </div>
                     {log.suspicionReasons.length > 0 && (
                       <div className={styles.reasonPills}>
                         {log.suspicionReasons.map((reason) => (
@@ -235,7 +252,9 @@ export default function SecurityPage() {
         </div>
 
         {error && <div className={styles.errorBanner}>{error}</div>}
-        {isLoading && <div className={styles.loadingBanner}>Loading security data...</div>}
+        {isLoading && (
+          <div className={styles.loadingBanner}>Loading security data...</div>
+        )}
       </section>
     </main>
   );

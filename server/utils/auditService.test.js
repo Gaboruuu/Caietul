@@ -53,7 +53,9 @@ const createFakeModels = () => {
 
   const SuspiciousObservation = {
     async findOne({ where }) {
-      return observations.find((entry) => entry.userId === where.userId) ?? null;
+      return (
+        observations.find((entry) => entry.userId === where.userId) ?? null
+      );
     },
     async create(entry) {
       const record = {
