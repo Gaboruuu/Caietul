@@ -4,6 +4,7 @@
 
 import { useEffect, useState, useCallback, useRef } from "react";
 import { API_BASE } from "../config/apiBase";
+import { buildAuthenticatedRequestInit } from "../utils/requestContext";
 
 export interface DataGeneration {
   isGenerating: boolean;
@@ -202,11 +203,14 @@ const invokeGraphQL = async <T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> => {
-  const response = await fetch(`${API_BASE}/graphql`, {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ query, variables }),
-  });
+  const response = await fetch(
+    `${API_BASE}/graphql`,
+    buildAuthenticatedRequestInit({
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ query, variables }),
+    }),
+  );
 
   if (!response.ok) {
     throw new Error(`Request failed with ${response.status}`);

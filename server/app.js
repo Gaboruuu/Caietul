@@ -5,9 +5,15 @@ import { createMatchStore } from "./store/matchStore.js";
 import { createChampionStore } from "./store/championStore.js";
 import { createDataGenerationManager } from "./utils/dataGenerationManager.js";
 import { createChatManager } from "./utils/chatManager.js";
+import {
+  attachAuditActor,
+  createAuditTrailMiddleware,
+} from "./utils/auditService.js";
 import { createGraphQLSchema, createRootResolvers } from "./graphql/schema.js";
 import { createMatchesRouter } from "./routes/matches.js";
 import { createChampionsRouter } from "./routes/champions.js";
+import { createSecurityRouter } from "./routes/security.js";
+import { createAuthRouter } from "./routes/auth.js";
 
 const jsonParseErrorHandler = (error, _request, response, next) => {
   if (error instanceof SyntaxError && "body" in error) {
@@ -16,8 +22,6 @@ const jsonParseErrorHandler = (error, _request, response, next) => {
 
   return next(error);
 };
-
-import { createAuthRouter } from "./routes/auth.js";
 
 export const createApp = ({
   store = createMatchStore(),
@@ -52,6 +56,11 @@ export const createApp = ({
   });
 
   app.use(express.json());
+  app.use(attachAuditActor);
+
+  if (models) {
+    app.use(createAuditTrailMiddleware(models));
+  }
 
   // Health check endpoint for connectivity detection
   // Responds to both GET and HEAD requests
@@ -74,6 +83,7 @@ export const createApp = ({
   // Authentication routes (if models available)
   if (models) {
     app.use("/api/auth", createAuthRouter(models));
+    app.use("/api/security", createSecurityRouter(models));
   }
 
   app.all("/graphql", async (request, response) => {

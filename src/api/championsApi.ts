@@ -1,5 +1,6 @@
 import type { Champion, ChampionInput } from "../types/champion";
 import { API_BASE } from "../config/apiBase";
+import { buildAuthenticatedRequestInit } from "../utils/requestContext";
 import { ApiValidationError } from "./matchesApi";
 
 type GraphQLErrorPayload = {
@@ -31,13 +32,16 @@ const graphqlRequest = async <T>(
   query: string,
   variables?: Record<string, unknown>,
 ): Promise<T> => {
-  const response = await fetch(`${API_BASE}/graphql`, {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ query, variables }),
-  });
+  const response = await fetch(
+    `${API_BASE}/graphql`,
+    buildAuthenticatedRequestInit({
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ query, variables }),
+    }),
+  );
 
   const payload = (await parseJson<GraphQLResponse<T>>(response)) ?? {};
 

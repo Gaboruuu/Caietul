@@ -1,0 +1,276 @@
+.page {
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at top left, rgba(60, 76, 112, 0.6), transparent 30%),
+    radial-gradient(circle at 80% 10%, rgba(14, 165, 233, 0.16), transparent 24%),
+    linear-gradient(180deg, #07111f 0%, #090f18 55%, #05070d 100%);
+  color: #f4f7ff;
+}
+
+.shell {
+  width: min(1320px, calc(100% - 2rem));
+  margin: 0 auto;
+  padding: 2rem 0 3rem;
+}
+
+.heroCard,
+.panel {
+  background: rgba(10, 16, 28, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.14);
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
+  backdrop-filter: blur(18px);
+  border-radius: 24px;
+}
+
+.heroCard {
+  padding: 2rem;
+  margin-bottom: 1.25rem;
+}
+
+.kicker,
+.panelKicker {
+  text-transform: uppercase;
+  letter-spacing: 0.18em;
+  font-size: 0.72rem;
+  color: #7dd3fc;
+  margin: 0 0 0.6rem;
+}
+
+.heroCard h1,
+.panel h2 {
+  margin: 0;
+  font-size: clamp(1.6rem, 2vw, 2.4rem);
+  line-height: 1.05;
+}
+
+.heroText {
+  margin: 0.85rem 0 0;
+  max-width: 70ch;
+  color: rgba(226, 232, 240, 0.72);
+  line-height: 1.6;
+}
+
+.summaryGrid {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 0.9rem;
+  margin-top: 1.5rem;
+}
+
+.summaryCard {
+  border-radius: 18px;
+  padding: 1rem 1.05rem;
+  background: rgba(15, 23, 42, 0.8);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.summaryLabel {
+  display: block;
+  font-size: 0.74rem;
+  color: rgba(226, 232, 240, 0.56);
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.summaryCard strong {
+  font-size: 1.4rem;
+}
+
+.dashboardGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.2fr) minmax(0, 0.9fr);
+  gap: 1rem;
+  align-items: start;
+}
+
+.panel {
+  padding: 1.25rem;
+}
+
+.panelHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  margin-bottom: 1rem;
+}
+
+.refreshBtn,
+.resolveBtn {
+  border: 1px solid rgba(148, 163, 184, 0.16);
+  background: rgba(15, 23, 42, 0.76);
+  color: #f8fafc;
+  border-radius: 999px;
+  padding: 0.7rem 1rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 160ms ease, background 160ms ease, border-color 160ms ease;
+}
+
+.refreshBtn:hover,
+.resolveBtn:hover:not(:disabled) {
+  transform: translateY(-1px);
+  border-color: rgba(125, 211, 252, 0.45);
+  background: rgba(14, 23, 38, 0.95);
+}
+
+.resolveBtn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.tableWrap {
+  overflow-x: auto;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 720px;
+}
+
+.table th,
+.table td {
+  padding: 0.9rem 0.8rem;
+  border-bottom: 1px solid rgba(148, 163, 184, 0.1);
+  text-align: left;
+  vertical-align: top;
+}
+
+.table th {
+  font-size: 0.76rem;
+  color: rgba(226, 232, 240, 0.55);
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+
+.subtle {
+  margin-top: 0.25rem;
+  color: rgba(226, 232, 240, 0.45);
+  font-size: 0.82rem;
+}
+
+.riskBadge,
+.metaBadge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0.3rem 0.7rem;
+  font-size: 0.78rem;
+  font-weight: 700;
+}
+
+.riskBadge {
+  background: rgba(251, 191, 36, 0.16);
+  color: #fbbf24;
+}
+
+.metaBadge {
+  background: rgba(96, 165, 250, 0.14);
+  color: #93c5fd;
+}
+
+.reasonCell {
+  max-width: 320px;
+  color: rgba(226, 232, 240, 0.74);
+}
+
+.logList {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.logCard {
+  border-radius: 18px;
+  padding: 1rem;
+  background: rgba(15, 23, 42, 0.82);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+}
+
+.logTopRow,
+.logMeta {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.logMeta {
+  margin-top: 0.85rem;
+  flex-wrap: wrap;
+  font-size: 0.82rem;
+  color: rgba(226, 232, 240, 0.55);
+}
+
+.logAction {
+  margin-top: 0.8rem;
+  color: #e2e8f0;
+  font-weight: 600;
+}
+
+.reasonPills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.4rem;
+  margin-top: 0.8rem;
+}
+
+.reasonPill {
+  padding: 0.3rem 0.55rem;
+  border-radius: 999px;
+  background: rgba(248, 113, 113, 0.14);
+  color: #fda4af;
+  font-size: 0.75rem;
+}
+
+.emptyState,
+.errorBanner,
+.loadingBanner {
+  margin-top: 1rem;
+  padding: 1rem 1.1rem;
+  border-radius: 16px;
+  background: rgba(15, 23, 42, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.12);
+  color: rgba(226, 232, 240, 0.8);
+}
+
+.errorBanner {
+  border-color: rgba(248, 113, 113, 0.32);
+  color: #fecaca;
+}
+
+@media (max-width: 1100px) {
+  .dashboardGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .summaryGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 720px) {
+  .shell {
+    width: min(100% - 1rem, 1320px);
+    padding: 1rem 0 2rem;
+  }
+
+  .heroCard,
+  .panel {
+    border-radius: 20px;
+    padding: 1rem;
+  }
+
+  .summaryGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .panelHeader,
+  .logTopRow {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+}

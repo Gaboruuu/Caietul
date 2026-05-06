@@ -47,6 +47,16 @@ export default function Header({ variant = "public" }: HeaderProps) {
           >
             Statistics
           </NavLink>
+          {isAdmin() && (
+            <NavLink
+              to="/security"
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+              }
+            >
+              Security
+            </NavLink>
+          )}
           <NavLink
             to="/tilt-meter"
             className={({ isActive }) =>

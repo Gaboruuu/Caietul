@@ -12,6 +12,7 @@ import MatchDetailPage from "./pages/MatchDetailPage";
 import MatchFormPage from "./pages/MatchFormPage";
 import DeleteConfirmPage from "./pages/DeleteConfirmPage";
 import ChatPage from "./pages/ChatPage";
+import SecurityPage from "./pages/SecurityPage";
 import CookieConsent from "./components/CookieConsent";
 import AppLayout from "./components/AppLayout";
 import { usePageTracking } from "./hooks/useTracking";
@@ -38,6 +39,7 @@ export default function App() {
           <Route path="/matches" element={<MatchHomePage />} />
           <Route path="/champions" element={<ChampionsPage />} />
           <Route path="/statistics" element={<StatisticsPage />} />
+          <Route path="/security" element={<SecurityPage />} />
           <Route path="/tilt-meter" element={<TiltMeterPage />} />
           <Route path="/tilt-meter/:id" element={<TiltMeterMatchPage />} />
           <Route path="/matches/:id" element={<MatchDetailPage />} />
