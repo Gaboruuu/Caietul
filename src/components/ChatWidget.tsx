@@ -14,25 +14,25 @@ export default function ChatWidget() {
   const [text, setText] = useState("");
   const [isConnected, setIsConnected] = useState(false);
   const wsRef = useRef<WebSocket | null>(null);
+  const retryRef = useRef<number>(0);
+  const reconnectTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectTriggerRef = useRef<number>(0);
+  const [connectTrigger, setConnectTrigger] = useState(0);
   const user =
     typeof window !== "undefined"
       ? JSON.parse(localStorage.getItem("currentUser") || "null")
       : null;
 
   useEffect(() => {
-    // Determine WebSocket URL
-    let wsUrl: string;
-    
-    if (import.meta.env.PROD && API_BASE) {
-      // Production: connect directly to backend
-      const backendUrl = new URL(API_BASE);
-      const protocol = backendUrl.protocol === "https:" ? "wss" : "ws";
-      wsUrl = `${protocol}://${backendUrl.host}/ws`;
-    } else {
-      // Development: use relative URL to proxy through Vite
-      const protocol = window.location.protocol === "https:" ? "wss" : "ws";
-      wsUrl = `${protocol}://${window.location.host}/ws`;
-    }
+    // Connect directly to backend WebSocket (bypass Vite proxy issues)
+    // In production, API_BASE is the backend URL
+    // In development, we connect directly to the remote backend
+    const backendUrl =
+      import.meta.env.PROD && API_BASE
+        ? API_BASE
+        : "https://caietul-backend.onrender.com";
+
+    const wsUrl = backendUrl.replace(/^http/, "ws") + "/ws";
 
     console.log("Connecting to WebSocket:", wsUrl);
     const ws = new WebSocket(wsUrl);
@@ -41,6 +41,7 @@ export default function ChatWidget() {
     ws.addEventListener("open", () => {
       console.log("WebSocket connected");
       setIsConnected(true);
+      retryRef.current = 0;
       // Identify ourselves to the server
       ws.send(JSON.stringify({ type: "identify", data: { user } }));
     });
@@ -63,17 +64,36 @@ export default function ChatWidget() {
       setIsConnected(false);
     });
 
-    ws.addEventListener("close", () => {
-      console.log("WebSocket closed");
+    ws.addEventListener("close", (ev) => {
+      console.log("WebSocket closed", {
+        code: ev?.code,
+        reason: ev?.reason,
+        wasClean: ev?.wasClean,
+      });
       setIsConnected(false);
+
+      // Attempt reconnect with exponential backoff
+      const retry = Math.min((retryRef.current || 0) + 1, 6); // cap retries
+      retryRef.current = retry;
+      const delay = Math.min(1000 * 2 ** (retry - 1), 30000);
+      console.log(`Reconnecting in ${delay}ms (attempt ${retry})`);
+      reconnectTimerRef.current = setTimeout(() => {
+        // trigger effect re-run by updating a ref timestamp
+        connectTriggerRef.current = Date.now();
+        setConnectTrigger(connectTriggerRef.current);
+      }, delay);
     });
 
     return () => {
+      if (reconnectTimerRef.current) {
+        clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = null;
+      }
       if (ws.readyState !== WebSocket.CLOSED) {
         ws.close();
       }
     };
-  }, [user]);
+  }, [user, connectTrigger]);
 
   const send = () => {
     if (!text.trim() || !wsRef.current) return;

@@ -114,19 +114,6 @@ export const createApp = ({
   });
   app.use(jsonParseErrorHandler);
 
-  // WebSocket upgrade handler
-  app.on("upgrade", (request, socket, head) => {
-    if (request.url === "/ws") {
-      const wss = new WebSocketServer({ noServer: true });
-      wss.handleUpgrade(request, socket, head, (ws) => {
-        dataGenerationManager.addClient(ws);
-      });
-    } else {
-      socket.destroy();
-    }
-  });
-
-  // Attach WebSocket setup for HTTP server
   // Attach WebSocket setup for HTTP server
   app.setupWebSocket = (server) => {
     const wss = new WebSocketServer({ server, path: "/ws" });
