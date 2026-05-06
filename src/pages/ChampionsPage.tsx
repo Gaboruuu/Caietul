@@ -5,6 +5,7 @@ import {
   fetchChampions,
   updateChampion,
 } from "../api/championsApi";
+import { isAdmin } from "../utils/auth";
 import styles from "../styles/ChampionsPage.module.css";
 import type { Champion, ChampionInput } from "../types/champion";
 import { ROLES } from "../types/match";
@@ -138,66 +139,68 @@ export default function ChampionsPage() {
         {error && <div className={styles.errorBanner}>{error}</div>}
 
         <section className={styles.layout}>
-          <form className={styles.card} onSubmit={handleSubmit}>
-            <div className={styles.cardHeader}>
-              <h2>{editingName ? "Edit champion" : "Add champion"}</h2>
-              {editingName && (
-                <button
-                  type="button"
-                  className={styles.linkBtn}
-                  onClick={resetForm}
+          {isAdmin() && (
+            <form className={styles.card} onSubmit={handleSubmit}>
+              <div className={styles.cardHeader}>
+                <h2>{editingName ? "Edit champion" : "Add champion"}</h2>
+                {editingName && (
+                  <button
+                    type="button"
+                    className={styles.linkBtn}
+                    onClick={resetForm}
+                  >
+                    Cancel edit
+                  </button>
+                )}
+              </div>
+
+              <label className={styles.field}>
+                <span>Name</span>
+                <input
+                  value={form.name}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, name: event.target.value }))
+                  }
+                  placeholder="e.g. Syndra"
+                  disabled={!!editingName}
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Icon</span>
+                <input
+                  value={form.icon}
+                  onChange={(event) =>
+                    setForm((prev) => ({ ...prev, icon: event.target.value }))
+                  }
+                  placeholder="e.g. 🔮"
+                />
+              </label>
+
+              <label className={styles.field}>
+                <span>Role</span>
+                <select
+                  value={form.role}
+                  onChange={(event) =>
+                    setForm((prev) => ({
+                      ...prev,
+                      role: event.target.value as ChampionInput["role"],
+                    }))
+                  }
                 >
-                  Cancel edit
-                </button>
-              )}
-            </div>
+                  {ROLES.map((role) => (
+                    <option key={role} value={role}>
+                      {role}
+                    </option>
+                  ))}
+                </select>
+              </label>
 
-            <label className={styles.field}>
-              <span>Name</span>
-              <input
-                value={form.name}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, name: event.target.value }))
-                }
-                placeholder="e.g. Syndra"
-                disabled={!!editingName}
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span>Icon</span>
-              <input
-                value={form.icon}
-                onChange={(event) =>
-                  setForm((prev) => ({ ...prev, icon: event.target.value }))
-                }
-                placeholder="e.g. 🔮"
-              />
-            </label>
-
-            <label className={styles.field}>
-              <span>Role</span>
-              <select
-                value={form.role}
-                onChange={(event) =>
-                  setForm((prev) => ({
-                    ...prev,
-                    role: event.target.value as ChampionInput["role"],
-                  }))
-                }
-              >
-                {ROLES.map((role) => (
-                  <option key={role} value={role}>
-                    {role}
-                  </option>
-                ))}
-              </select>
-            </label>
-
-            <button type="submit" className={styles.primaryBtn}>
-              {editingName ? "Save Champion" : "Add Champion"}
-            </button>
-          </form>
+              <button type="submit" className={styles.primaryBtn}>
+                {editingName ? "Save Champion" : "Add Champion"}
+              </button>
+            </form>
+          )}
 
           <div className={styles.listColumn}>
             {isLoading ? (
@@ -233,23 +236,28 @@ export default function ChampionsPage() {
                     </div>
                   </div>
 
-                  <div className={styles.actions}>
-                    <button type="button" onClick={() => handleEdit(champion)}>
-                      Edit
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleDelete(champion.name)}
-                      disabled={champion.matchesCount > 0}
-                      title={
-                        champion.matchesCount > 0
-                          ? "Delete or reassign the linked matches first"
-                          : "Delete champion"
-                      }
-                    >
-                      Delete
-                    </button>
-                  </div>
+                  {isAdmin() && (
+                    <div className={styles.actions}>
+                      <button
+                        type="button"
+                        onClick={() => handleEdit(champion)}
+                      >
+                        Edit
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => handleDelete(champion.name)}
+                        disabled={champion.matchesCount > 0}
+                        title={
+                          champion.matchesCount > 0
+                            ? "Delete or reassign the linked matches first"
+                            : "Delete champion"
+                        }
+                      >
+                        Delete
+                      </button>
+                    </div>
+                  )}
                 </article>
               ))
             )}

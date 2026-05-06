@@ -1,5 +1,6 @@
 import { faker } from "@faker-js/faker";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { isAdmin } from "../utils/auth";
 import styles from "../styles/StatisticsPage.module.css";
 import { calculateKda, formatDuration } from "../store/matchStore";
 import { createMatch, deleteMatch, fetchAllMatches } from "../api/matchesApi";
@@ -375,23 +376,25 @@ export default function StatisticsPage() {
             <h1>Statistics</h1>
             <p>Season 2026 · Last 25 ranked games · ShadowBlade#EUW</p>
           </div>
-          <div className={styles.fakerControls}>
-            <button
-              type="button"
-              className={`${styles.controlBtn} ${isGenerating ? styles.stopBtn : styles.startBtn}`}
-              onClick={handleToggleGenerator}
-            >
-              {isGenerating ? "Stop Faker Feed" : "Start Faker Feed"}
-            </button>
-            <button
-              type="button"
-              className={`${styles.controlBtn} ${styles.clearBtn}`}
-              onClick={handleDeleteFakerData}
-              disabled={fakerIdsRef.current.size === 0}
-            >
-              Delete Faker Data
-            </button>
-          </div>
+          {isAdmin() && (
+            <div className={styles.fakerControls}>
+              <button
+                type="button"
+                className={`${styles.controlBtn} ${isGenerating ? styles.stopBtn : styles.startBtn}`}
+                onClick={handleToggleGenerator}
+              >
+                {isGenerating ? "Stop Faker Feed" : "Start Faker Feed"}
+              </button>
+              <button
+                type="button"
+                className={`${styles.controlBtn} ${styles.clearBtn}`}
+                onClick={handleDeleteFakerData}
+                disabled={fakerIdsRef.current.size === 0}
+              >
+                Delete Faker Data
+              </button>
+            </div>
+          )}
         </div>
 
         <div className={styles.summaryGrid}>

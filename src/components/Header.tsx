@@ -1,4 +1,5 @@
-import { Link, NavLink } from "react-router-dom";
+import { Link, NavLink, useNavigate } from "react-router-dom";
+import { isAdmin } from "../utils/auth";
 import styles from "../styles/SiteChrome.module.css";
 
 type HeaderVariant = "public" | "app";
@@ -9,6 +10,7 @@ type HeaderProps = {
 
 export default function Header({ variant = "public" }: HeaderProps) {
   const logoTo = variant === "app" ? "/matches" : "/";
+  const navigate = useNavigate();
 
   if (variant === "app") {
     return (
@@ -27,14 +29,16 @@ export default function Header({ variant = "public" }: HeaderProps) {
           >
             Matches
           </NavLink>
-          <NavLink
-            to="/champions"
-            className={({ isActive }) =>
-              `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
-            }
-          >
-            Champions
-          </NavLink>
+          {isAdmin() && (
+            <NavLink
+              to="/champions"
+              className={({ isActive }) =>
+                `${styles.navLink} ${isActive ? styles.navLinkActive : ""}`
+              }
+            >
+              Champions
+            </NavLink>
+          )}
           <NavLink
             to="/statistics"
             className={({ isActive }) =>
@@ -60,6 +64,20 @@ export default function Header({ variant = "public" }: HeaderProps) {
             Chat
           </NavLink>
         </nav>
+        <div className={styles.navActions}>
+          <button
+            type="button"
+            className={styles.btnOutline}
+            onClick={() => {
+              // lazy logout: clear localStorage and go to landing
+              localStorage.removeItem("currentUser");
+              localStorage.removeItem("currentRoles");
+              navigate("/");
+            }}
+          >
+            Sign out
+          </button>
+        </div>
       </header>
     );
   }
