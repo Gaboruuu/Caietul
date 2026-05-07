@@ -36,6 +36,7 @@ export const createApp = ({
 
   app.use((request, response, next) => {
     const origin = request.headers.origin;
+    const requestedHeaders = request.headers["access-control-request-headers"];
 
     response.setHeader("Access-Control-Allow-Origin", origin || "*");
     response.setHeader("Vary", "Origin");
@@ -43,9 +44,15 @@ export const createApp = ({
       "Access-Control-Allow-Methods",
       "GET,POST,PUT,PATCH,DELETE,OPTIONS,HEAD",
     );
+
+    const defaultAllowedHeaders =
+      "Content-Type, Authorization, X-User-Id, X-User-Email, X-User-Name, X-User-Roles";
+
     response.setHeader(
       "Access-Control-Allow-Headers",
-      "Content-Type, Authorization",
+      typeof requestedHeaders === "string" && requestedHeaders.trim().length > 0
+        ? requestedHeaders
+        : defaultAllowedHeaders,
     );
 
     if (request.method === "OPTIONS") {

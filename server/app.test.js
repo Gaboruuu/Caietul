@@ -48,6 +48,26 @@ describe("GET /api/health", () => {
   });
 });
 
+describe("CORS preflight", () => {
+  it("allows custom x-user-roles header used by GraphQL calls", async () => {
+    const response = await request(app)
+      .options("/graphql")
+      .set("Origin", "https://caietul.onrender.com")
+      .set(
+        "Access-Control-Request-Headers",
+        "content-type, x-user-roles, x-user-email",
+      );
+
+    expect(response.status).toBe(204);
+    expect(response.headers["access-control-allow-origin"]).toBe(
+      "https://caietul.onrender.com",
+    );
+    expect(response.headers["access-control-allow-headers"]).toContain(
+      "x-user-roles",
+    );
+  });
+});
+
 describe("Matches generation endpoints", () => {
   it("starts, reports and stops generation over HTTP", async () => {
     const startResponse = await request(app)
