@@ -3,11 +3,10 @@
  * Allows starting/stopping the generation loop and displays current status
  */
 
-import React, { useState, useCallback, useEffect } from "react";
+import React, { useState, useCallback } from "react";
 import {
   useDataGenerationControl,
   useWebSocket,
-  type DataGeneration,
   type MatchBatch,
 } from "../hooks/useWebSocket";
 import styles from "../styles/DataGenerationControl.module.css";

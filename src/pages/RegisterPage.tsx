@@ -10,18 +10,22 @@ export default function RegisterPage() {
   const [summoner, setSummoner] = useState("");
   const [password, setPassword] = useState("");
   const [acceptedTerms, setAcceptedTerms] = useState(false);
+  const [showValidation, setShowValidation] = useState(false);
+
+  const isFormValid = Boolean(
+    firstName.trim() &&
+    lastName.trim() &&
+    email.trim() &&
+    summoner.trim() &&
+    password.trim() &&
+    acceptedTerms,
+  );
 
   const handleSubmit = (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    if (
-      !firstName.trim() ||
-      !lastName.trim() ||
-      !email.trim() ||
-      !summoner.trim() ||
-      !password.trim() ||
-      !acceptedTerms
-    ) {
+    if (!isFormValid) {
+      setShowValidation(true);
       return;
     }
 
@@ -150,8 +154,14 @@ export default function RegisterPage() {
                 <input
                   id="register-terms"
                   type="checkbox"
+                  className={styles.termsCheckbox}
                   checked={acceptedTerms}
-                  onChange={(event) => setAcceptedTerms(event.target.checked)}
+                  onChange={(event) => {
+                    setAcceptedTerms(event.target.checked);
+                    if (event.target.checked) {
+                      setShowValidation(false);
+                    }
+                  }}
                   required
                 />
                 <label htmlFor="register-terms">
@@ -160,7 +170,17 @@ export default function RegisterPage() {
                 </label>
               </div>
 
-              <button type="submit" className={styles.btnSubmit}>
+              {showValidation && !acceptedTerms && (
+                <p className={styles.termsError}>
+                  Please check the Terms box to continue.
+                </p>
+              )}
+
+              <button
+                type="submit"
+                className={styles.btnSubmit}
+                disabled={!isFormValid}
+              >
                 Create account →
               </button>
             </form>

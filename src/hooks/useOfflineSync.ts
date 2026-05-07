@@ -7,14 +7,9 @@ import { useEffect, useState, useCallback } from "react";
 import {
   isNetworkOnline,
   onConnectivityChange,
-  getConnectivityStatus,
   checkServerConnectivity,
 } from "../utils/networkConnectivity";
-import {
-  getPendingOperationCount,
-  onQueueChange,
-  type QueuedOperation,
-} from "../utils/syncQueue";
+import { getPendingOperationCount, onQueueChange } from "../utils/syncQueue";
 import { syncPendingOperations, isSyncInProgress } from "../utils/offlineSync";
 
 export interface OfflineSyncStatus {

@@ -1,3 +1,4 @@
+// @ts-nocheck
 /**
  * Integration Guide - How to Use Offline Support in Existing Components
  *

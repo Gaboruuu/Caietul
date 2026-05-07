@@ -149,9 +149,14 @@ export default function ChatWidget() {
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
-          placeholder="Type a message"
+          placeholder={isConnected ? "Type a message" : "Connecting..."}
         />
-        <button type="button" onClick={send} className={styles.sendBtn}>
+        <button
+          type="button"
+          onClick={send}
+          className={styles.sendBtn}
+          disabled={!isConnected}
+        >
           Send
         </button>
       </div>

@@ -3,7 +3,7 @@
  * This file shows how to use the offline sync features in your components
  */
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useOfflineSync, useOnServerReconnect } from "../hooks/useOfflineSync";
 import { OfflineError } from "../api/matchesApi";
 
@@ -106,7 +106,7 @@ export function OfflineAwareFormExample() {
     useOfflineSync();
   const [formData, setFormData] = useState({ champion: "", kills: 0 });
   const [isSaving, setIsSaving] = useState(false);
-  const [tempId, setTempId] = useState<string | null>(null);
+  const [tempId] = useState<string | null>(null);
 
   const canSaveToServer = isOnline && isServerReachable;
   const statusIcon = canSaveToServer ? "✅" : "⏸️";
@@ -212,7 +212,7 @@ export function SyncProgressExample() {
  * Example 8: Refresh Data on Reconnection
  */
 export function RefreshDataOnReconnectExample() {
-  const [data, setData] = useState([]);
+  const [data] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
 
   useOnServerReconnect(async () => {
@@ -256,9 +256,7 @@ export function ConnectivityDetectionExample() {
  * Example 10: Show Temporary IDs During Offline Create
  */
 export function TemporaryIDExample() {
-  const [matches, setMatches] = useState([
-    { id: "match-1", champion: "Lux", kills: 5 },
-  ]);
+  const [matches] = useState([{ id: "match-1", champion: "Lux", kills: 5 }]);
 
   const renderID = (id: string) => {
     if (id.startsWith("temp-")) {

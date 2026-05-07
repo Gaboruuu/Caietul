@@ -3,7 +3,7 @@
  * This demonstrates how to use the WebSocket hooks and components together
  */
 
-import React, { useState, useCallback } from "react";
+import { useState, useCallback } from "react";
 import DataGenerationControl from "../components/DataGenerationControl";
 import { useMatchListWithUpdates } from "../hooks/useMatchListWithUpdates";
 import { type MatchBatch } from "../hooks/useWebSocket";
@@ -21,7 +21,6 @@ export default function DataGenerationDemoPage() {
     isLoading,
     error,
     setCurrentPage,
-    wsConnected,
     lastBatchReceived,
   } = useMatchListWithUpdates({
     pageSize: 10,
